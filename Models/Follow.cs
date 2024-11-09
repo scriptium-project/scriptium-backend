@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using writings_backend_dotnet.Models;
@@ -21,8 +20,8 @@ public class Follow
     public DateTime OccurredAt { get; set; }
 
     [ForeignKey("FollowerId")]
-    public required User Follower { get; set; }
+    public User? Follower { get; set; }
 
     [ForeignKey("FollowedId")]
-    public required User Followed { get; set; }
+    public User? Followed { get; set; }
 }

@@ -1,8 +1,3 @@
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
-
 namespace writings_backend_dotnet.Models
 {
     public enum FollowStatus
@@ -10,7 +5,7 @@ namespace writings_backend_dotnet.Models
         Pending,
         Accepted
     }
-    
+
     public enum FollowRStatus
     {
         AutomaticallyAccepted,

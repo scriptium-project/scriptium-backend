@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,12 +12,12 @@ namespace writings_backend_dotnet.Models
         [Required, ForeignKey("Collection"), Column("collection_id", TypeName = "uuid")]
         public Guid CollectionId { get; set; }
 
-        public virtual Collection Collection { get; set; } = null!;
+        public Collection? Collection { get; set; }
 
         [Required, ForeignKey("Verse"), Column("verse_id")]
         public int VerseId { get; set; }
 
-        public virtual Verse Verse { get; set; } = null!;
+        public Verse? Verse { get; set; }
 
         [Column("saved_at", TypeName = "timestamp")]
         public DateTime SavedAt { get; set; }

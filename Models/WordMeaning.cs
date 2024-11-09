@@ -14,11 +14,11 @@ namespace writings_backend_dotnet.Models
         [Required, ForeignKey("Word")]
         public long WordId { get; set; }
 
-        public virtual Word Word { get; set; } = null!;
+        public Word? Word { get; set; }
 
         [Required, ForeignKey("Language")]
         public short LanguageId { get; set; }
 
-        public virtual Language Language { get; set; } = null!;
+        public Language? Language { get; set; }
     }
 }

@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace writings_backend_dotnet.Models
 {
@@ -13,8 +8,8 @@ namespace writings_backend_dotnet.Models
         [Key, Column("id", TypeName = "bigint")]
         public long Id { get; set; }
 
-        [Required, Column("sequence_number",TypeName = "smallint")]
-        public required int SequenceNumber { get; set; }
+        [Required, Column("sequence_number", TypeName = "smallint")]
+        public required short SequenceNumber { get; set; }
 
         [Required]
         public required string Text { get; set; }
@@ -30,10 +25,10 @@ namespace writings_backend_dotnet.Models
 
         public int? RootId { get; set; } = null!;
 
-        public Root? Root { get; set; } = null!;
+        public Root? Root { get; set; }
 
-        public required List<WordMeaning> WordMeanings { get; set; }
-        
+        public List<WordMeaning>? WordMeanings { get; set; }
+
 
     }
 }

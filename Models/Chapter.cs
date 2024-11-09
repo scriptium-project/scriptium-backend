@@ -1,12 +1,11 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace writings_backend_dotnet.Models
 {
     public class Chapter
     {
-        [Key,Column("id")]
+        [Key, Column("id")]
         public int Id { get; set; }
 
         [Required, Column("chapter_name", TypeName = "varchar(250)")]
@@ -16,15 +15,15 @@ namespace writings_backend_dotnet.Models
         public required short Number { get; set; }
 
         [NotMapped]
-        public int VerseCount => Verses.Count;
+        public short VerseCount => (short)(Verses?.Count ?? -1);
 
         [Required, Column("section_id", TypeName = "smallint")]
         public required short SectionId { get; set; }
 
-        public required Section Section { get; set; }
+        public Section Section { get; set; } = null!;
 
         public List<Verse> Verses { get; set; } = [];
-        
+
         public List<ChapterMeaning> Meanings { get; set; } = [];
 
     }

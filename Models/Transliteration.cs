@@ -12,12 +12,13 @@ namespace writings_backend_dotnet.Models
         public string Text { get; set; } = null!;
 
         [Required, ForeignKey("Language")]
-        public short LanguageId { get; set; }
+        public required short LanguageId { get; set; }
 
-        public virtual Language Language { get; set; } = null!;
+        public required Language Language { get; set; }
 
-        public int? VerseId { get; set; }
+        [Required]
+        public required int VerseId { get; set; }
 
-        public virtual Verse? Verse { get; set; }
+        public required Verse Verse { get; set; }
     }
 }

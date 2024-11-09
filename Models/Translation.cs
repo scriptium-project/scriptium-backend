@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,10 +23,10 @@ namespace writings_backend_dotnet.Models
         [Required, ForeignKey("Language"), Column("language_id")]
         public short LanguageId { get; set; } = 1;
 
-        public virtual Language Language { get; set; } = null!;
+        public required Language Language { get; set; }
 
-        public virtual List<TranslatorTranslation> TranslatorTranslations { get; set; } = [];
+        public required List<TranslatorTranslation> TranslatorTranslations { get; set; } = [];
 
-        public virtual List<TranslationText> TranslationTexts { get; set; } = [];
+        public required List<TranslationText> TranslationTexts { get; set; } = [];
     }
 }

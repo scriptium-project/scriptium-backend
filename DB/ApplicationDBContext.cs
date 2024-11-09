@@ -8,46 +8,81 @@ namespace writings_backend_dotnet.DB
       {
 
             public required DbSet<Language> Language { get; set; }
+
             public required DbSet<Scripture> Scripture { get; set; }
+
             public required DbSet<ScriptureMeaning> ScriptureMeaning { get; set; }
+
             public required DbSet<Section> Section { get; set; }
+
             public required DbSet<SectionMeaning> SectionMeaning { get; set; }
+
             public required DbSet<Chapter> Chapter { get; set; }
+
             public required DbSet<ChapterMeaning> ChapterMeaning { get; set; }
+
             public required DbSet<Root> Root { get; set; }
+
             public required DbSet<Verse> Verse { get; set; }
+
             public required DbSet<Word> Word { get; set; }
+
             public required DbSet<WordMeaning> WordMeaning { get; set; }
+
             public required DbSet<Transliteration> Transliteration { get; set; }
+
             public required DbSet<Translator> Translator { get; set; }
+
             public required DbSet<Translation> Translation { get; set; }
+
             public required DbSet<TranslatorTranslation> TranslatorTranslation { get; set; }
+
             public required DbSet<TranslationText> TranslationText { get; set; }
+
             public required DbSet<FootNoteText> FootNoteText { get; set; }
+
             public required DbSet<FootNote> FootNote { get; set; }
+
             public required DbSet<Role> Role { get; set; }
+
             public required DbSet<User> User { get; set; }
+
             public required DbSet<Session> Session { get; set; }
+
             public required DbSet<Collection> Collection { get; set; }
+
             public required DbSet<CollectionVerse> CollectionVerse { get; set; }
+
             public required DbSet<Note> Note { get; set; }
+
             public required DbSet<Comment> Comment { get; set; }
+
             public required DbSet<CommentVerse> CommentVerse { get; set; }
+
             public required DbSet<CommentNote> CommentNotes { get; set; }
+
             public required DbSet<Follow> Follow { get; set; }
+
             public required DbSet<Block> Block { get; set; }
+
             public required DbSet<FreezeR> FreezeR { get; set; }
+
             public required DbSet<Like> Like { get; set; }
+
             public required DbSet<LikeComment> LikeNote { get; set; }
+
             public required DbSet<Notification> Notification { get; set; }
+
             public required DbSet<Cache> Cache { get; set; }
+
             public required DbSet<Suggestion> Suggestion { get; set; }
+
             public required DbSet<RequestLog> RequestLog { get; set; }
+
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                   base.OnModelCreating(modelBuilder);
-
 
                   modelBuilder.Entity<Language>(Language =>
                   {
@@ -68,6 +103,8 @@ namespace writings_backend_dotnet.DB
                                           new Language { Id = 1, LangCode = "en", LangOwn = "English", LangEnglish = "English" },
                                           new Language { Id = 2, LangCode = "de", LangOwn = "Deutsch", LangEnglish = "German" }
                                       );
+
+
                   });
 
                   modelBuilder.Entity<Scripture>(Scripture =>
@@ -118,7 +155,7 @@ namespace writings_backend_dotnet.DB
                         .IsUnique();
 
                         Section.HasOne(c => c.Scripture)
-                        .WithMany(p => p.Sections)
+                        .WithMany(scr => scr.Sections)
                         .HasForeignKey(c => c.ScriptureId)
                         .OnDelete(DeleteBehavior.Restrict);
                   });
@@ -136,12 +173,12 @@ namespace writings_backend_dotnet.DB
                         SectionMeaning.HasOne(c => c.Language)
                                   .WithMany(e => e.SectionMeanings)
                                   .HasForeignKey(e => e.LanguageId)
-                                  .OnDelete(DeleteBehavior.Cascade);
+                                  .OnDelete(DeleteBehavior.Restrict);
 
                         SectionMeaning.HasOne(c => c.Section)
                                   .WithMany(e => e.Meanings)
                                   .HasForeignKey(e => e.SectionId)
-                                  .OnDelete(DeleteBehavior.Cascade);
+                                  .OnDelete(DeleteBehavior.Restrict);
                   });
 
                   modelBuilder.Entity<Chapter>(Chapter =>
@@ -1276,5 +1313,8 @@ namespace writings_backend_dotnet.DB
 
 
             }
+
       }
+
+
 }

@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace writings_backend_dotnet.Models
 {
@@ -10,7 +9,7 @@ namespace writings_backend_dotnet.Models
         public int Id { get; set; }
 
         [Required, Column("verse_number", TypeName = "smallint")]
-        public required int Number { get; set; }
+        public required short Number { get; set; }
 
         [Required]
         public required string Text { get; set; }
@@ -25,18 +24,18 @@ namespace writings_backend_dotnet.Models
 
         public required Chapter Chapter { get; set; }
 
-        public virtual List<Word> Words { get; set; } = [];
+        public List<Word> Words { get; set; } = [];
 
-        public virtual List<Transliteration> Transliterations { get; set; } = [];
+        public List<Transliteration> Transliterations { get; set; } = [];
 
-        public virtual List<TranslationText> TranslationTexts { get; set; } = [];
+        public List<TranslationText> TranslationTexts { get; set; } = [];
 
-        public virtual List<CollectionVerse> CollectionVerses { get; set; } = [];
+        public List<CollectionVerse> CollectionVerses { get; set; } = [];
 
-        public virtual List<Note> Notes { get; set; } = [];
-        
-        public virtual List<CommentVerse> Comments { get; set; } = [];
+        public List<Note> Notes { get; set; } = [];
 
-        
+        public List<CommentVerse> Comments { get; set; } = [];
+
+
     }
 }

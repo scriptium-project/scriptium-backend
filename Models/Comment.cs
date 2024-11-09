@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,7 +12,7 @@ namespace writings_backend_dotnet.Models
         [Required, ForeignKey("User"), Column("user_id", TypeName = "uuid")]
         public Guid UserId { get; set; }
 
-        public virtual User User { get; set; } = null!;
+        public User? User { get; set; }
 
         [Required, MaxLength(500), Column("text", TypeName = "varchar(500)")]
         public string Text { get; set; } = null!;
@@ -28,19 +26,19 @@ namespace writings_backend_dotnet.Models
         [ForeignKey("ParentComment"), Column("parent_comment_id", TypeName = "bigint")]
         public long? ParentCommentId { get; set; }
 
-        public virtual Comment? ParentComment { get; set; }
+        public Comment? ParentComment { get; set; }
 
-        public virtual List<Comment> Replies { get; set; } = [];
+        public List<Comment>? Replies { get; set; }
 
         public long? CommentVerseId { get; set; } = null!;
 
-        public virtual CommentVerse CommentVerse { get; set; } = null!;
+        public CommentVerse? CommentVerse { get; set; }
 
         public long? CommentNoteId { get; set; } = null!;
 
-        public virtual CommentNote CommentNote { get; set; } = null!;
+        public CommentNote? CommentNote { get; set; }
 
-        public virtual List<LikeComment> LikeComments { get; set; } = [];
+        public List<LikeComment>? LikeComments { get; set; }
 
 
     }

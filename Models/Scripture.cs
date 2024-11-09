@@ -1,8 +1,5 @@
-
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace writings_backend_dotnet.Models
 {
@@ -15,18 +12,18 @@ namespace writings_backend_dotnet.Models
         public required string Name { get; set; }
 
         [Column(TypeName = "char(1)"), MaxLength(1), Required]
-        public required int Code { get; set; }
+        public required string Code { get; set; }
 
         [NotMapped]
-        public int SectionCount => Sections.Count;
+        public short SectionCount => (short)(Sections?.Count ?? -1);
 
-        [Required]
-        public required int ScriptureMeaningId { get; set; }
+        [Required, Column(TypeName = "smallint")]
+        public required short Number { get; set; }
 
         public List<ScriptureMeaning> Meanings { get; set; } = [];
-        
-        public List<Section> Sections = [];
 
-        public List<Root> Roots = [];
+        public List<Section> Sections { get; set; } = [];
+
+        public List<Root> Roots { get; set; } = [];
     }
 }

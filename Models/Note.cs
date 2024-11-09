@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,15 +13,15 @@ namespace writings_backend_dotnet.Models
         [Required, Column("user_id", TypeName = "uuid"), ForeignKey("User")]
         public Guid UserId { get; set; }
 
-        public virtual User User { get; set; } = null!;
+        public User? User { get; set; }
 
-        [Required,Column("text", TypeName = "text")]
+        [Required, Column("text", TypeName = "text")]
         public string Text { get; set; } = null!;
 
         [Required, Column("verse_id", TypeName = "integer"), ForeignKey("Verse")]
         public int VerseId { get; set; }
 
-        public virtual Verse Verse { get; set; } = null!;
+        public Verse? Verse { get; set; }
 
         [Column("created_at", TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
@@ -30,9 +29,9 @@ namespace writings_backend_dotnet.Models
         [Column("updated_at", TypeName = "timestamp")]
         public DateTime? UpdatedAt { get; set; }
 
-        public virtual List<CommentNote> Comments { get; set; } = [];
+        public List<CommentNote>? Comments { get; set; }
 
-        public virtual List<LikeNote> LikeNotes { get; set; } = [];
+        public List<LikeNote>? LikeNotes { get; set; }
 
     }
 }

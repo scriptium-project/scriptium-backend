@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace writings_backend_dotnet.Models
 {
@@ -15,7 +14,10 @@ namespace writings_backend_dotnet.Models
         [Required, Column("scripture_id", TypeName = "smallint")]
         public required short ScriptureId { get; set; }
         public required Scripture Scripture { get; set; }
+        [NotMapped]
+        public short WordCount => (short)(Words?.Count ?? -1);
         public List<Word> Words { get; set; } = [];
+
 
     }
 }

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,7 +12,7 @@ namespace writings_backend_dotnet.Models
         [ForeignKey("User"), Column("user_id", TypeName = "uuid")]
         public Guid? UserId { get; set; }
 
-        public virtual User? User { get; set; }
+        public User? User { get; set; }
 
         [Column("expires_at", TypeName = "timestamp")]
         public DateTime? ExpiresAt { get; set; }

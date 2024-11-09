@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace writings_backend_dotnet.Models
 {
@@ -19,7 +18,7 @@ namespace writings_backend_dotnet.Models
 
         [Required]
         public required short LanguageId { get; set; }
-        
+
         public required Language Language { get; set; }
     }
 }

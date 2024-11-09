@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,13 +9,13 @@ namespace writings_backend_dotnet.Models
         public short TranslatorId { get; set; }
 
         [Required, ForeignKey("TranslatorId")]
-        public virtual Translator Translator { get; set; } = null!;
+        public required Translator Translator { get; set; }
 
         [Required, Column("translation_id", TypeName = "smallint")]
         public short TranslationId { get; set; }
 
         [Required, ForeignKey("TranslationId")]
-        public virtual Translation Translation { get; set; } = null!;
+        public required Translation Translation { get; set; }
 
         [Column("assigned_on")]
         public DateTime AssignedOn { get; set; }

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,7 +10,7 @@ namespace writings_backend_dotnet.Models
 
         [Required, MaxLength(4000)]
         public string Text { get; set; } = null!;
-        
-        public virtual List<FootNote> FootNotes { get; set; } = [];
+
+        public List<FootNote>? FootNotes { get; set; }
     }
 }

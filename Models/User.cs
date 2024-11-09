@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -45,38 +43,38 @@ namespace writings_backend_dotnet.Models
         public short? RoleId { get; set; }
 
         [ForeignKey("RoleId")]
-        public virtual Role? Role { get; set; }
+        public Role? Role { get; set; }
 
         [Column("preferred_languageId", TypeName = "smallint")]
         public short PreferredLanguageId { get; set; } = 1;
 
         [ForeignKey("PreferredLanguageId")]
-        public virtual Language PreferredLanguage { get; set; } = null!;
+        public Language? PreferredLanguage { get; set; }
 
-        public virtual List<Session> Sessions { get; set; } = [];
+        public List<Session>? Sessions { get; set; }
 
-        public virtual List<Collection> Collections { get; set; } = [];
+        public List<Collection>? Collections { get; set; }
 
-        public virtual List<Note> Notes { get; set; } = [];
+        public List<Note>? Notes { get; set; }
 
-        public virtual List<Comment> Comments { get; set; } = [];
+        public List<Comment>? Comments { get; set; }
 
-        public virtual List<Follow> Followers { get; set; } = [];
+        public List<Follow>? Followers { get; set; }
 
-        public virtual List<Follow> Following { get; set; } = [];
+        public List<Follow>? Following { get; set; }
 
-        public virtual List<Block> BlockedUsers { get; set; } = [];
+        public List<Block>? BlockedUsers { get; set; }
 
-        public virtual List<Block> BlockedByUsers { get; set; } = [];
+        public List<Block>? BlockedByUsers { get; set; }
 
-        public virtual List<FreezeR> FreezeRecords { get; set; } = [];
+        public List<FreezeR>? FreezeRecords { get; set; }
 
-        public virtual List<Like> Likes { get; set; } = [];
+        public List<Like>? Likes { get; set; }
 
-        public virtual List<Notification> NotificationsReceived { get; set; } = [];
+        public List<Notification>? NotificationsReceived { get; set; }
 
-        public virtual List<Notification> NotificationsSent { get; set; } = [];
-   
-        
+        public List<Notification>? NotificationsSent { get; set; }
+
+
     }
 }

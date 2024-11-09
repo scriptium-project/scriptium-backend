@@ -95,8 +95,8 @@ namespace writings_backend_dotnet.Migrations
                     id = table.Column<short>(type: "smallint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Code = table.Column<int>(type: "char(1)", maxLength: 1, nullable: false),
-                    ScriptureMeaningId = table.Column<int>(type: "integer", nullable: false)
+                    Code = table.Column<string>(type: "char(1)", maxLength: 1, nullable: false),
+                    Number = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -512,13 +512,13 @@ namespace writings_backend_dotnet.Migrations
                         column: x => x.LanguageId,
                         principalTable: "language",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_section_meaning_section_SectionId",
                         column: x => x.SectionId,
                         principalTable: "section",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -711,7 +711,7 @@ namespace writings_backend_dotnet.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Text = table.Column<string>(type: "varchar(1500)", maxLength: 1500, nullable: false),
                     LanguageId = table.Column<short>(type: "smallint", nullable: false),
-                    VerseId = table.Column<int>(type: "integer", nullable: true)
+                    VerseId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

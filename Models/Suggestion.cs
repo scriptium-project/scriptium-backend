@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace writings_backend_dotnet.Models
 {
@@ -23,8 +21,8 @@ namespace writings_backend_dotnet.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public required User User { get; set; }
-        public required TranslationText TranslationText { get; set; }
+        public User? User { get; set; }
+        public TranslationText? TranslationText { get; set; }
     }
 
 }

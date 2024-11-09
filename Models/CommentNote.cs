@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,9 +12,9 @@ namespace writings_backend_dotnet.Models
         [Required, Column("note_id", TypeName = "integer")]
         public int NoteId { get; set; }
 
-        public virtual Comment Comment { get; set; } = null!;
+        public Comment? Comment { get; set; }
 
-        public virtual Note Note { get; set; } = null!;
+        public Note? Note { get; set; }
     }
 
 }

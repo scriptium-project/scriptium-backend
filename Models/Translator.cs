@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +8,7 @@ namespace writings_backend_dotnet.Models
         [Key, Column("id", TypeName = "smallint"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public short Id { get; set; }
 
-        [Required , Column("translator_name", TypeName = "varchar(250)") , MaxLength(250)]
+        [Required, Column("translator_name", TypeName = "varchar(250)"), MaxLength(250)]
         public string Name { get; set; } = null!;
 
         [Column("description", TypeName = "varchar(1500)"), MaxLength(1500)]
@@ -21,8 +20,8 @@ namespace writings_backend_dotnet.Models
         [Required, Column("language_id"), ForeignKey("Language")]
         public short LanguageId { get; set; }
 
-        public virtual Language Language { get; set; } = null!;
+        public required Language Language { get; set; }
 
-        public virtual ICollection<TranslatorTranslation> TranslatorTranslations { get; set; } = [];
+        public required List<TranslatorTranslation> TranslatorTranslations { get; set; }
     }
 }

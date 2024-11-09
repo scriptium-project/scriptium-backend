@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using writings_backend_dotnet.Models;
@@ -19,5 +18,5 @@ public class FreezeR
     public DateTime ProceedAt { get; set; }
 
     [ForeignKey("UserId")]
-    public required User User { get; set; }
+    public User? User { get; set; }
 }

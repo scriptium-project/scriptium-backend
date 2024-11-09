@@ -751,7 +751,8 @@ namespace writings_backend_dotnet.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
 
-                    b.Property<int>("Code")
+                    b.Property<string>("Code")
+                        .IsRequired()
                         .HasMaxLength(1)
                         .HasColumnType("char(1)");
 
@@ -759,8 +760,8 @@ namespace writings_backend_dotnet.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ScriptureMeaningId")
-                        .HasColumnType("integer");
+                    b.Property<short>("Number")
+                        .HasColumnType("smallint");
 
                     b.HasKey("Id");
 
@@ -1074,7 +1075,7 @@ namespace writings_backend_dotnet.Migrations
                         .HasMaxLength(1500)
                         .HasColumnType("varchar(1500)");
 
-                    b.Property<int?>("VerseId")
+                    b.Property<int>("VerseId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -1597,13 +1598,13 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Language", "Language")
                         .WithMany("SectionMeanings")
                         .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Section", "Section")
                         .WithMany("Meanings")
                         .HasForeignKey("SectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Language");
@@ -1711,7 +1712,8 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Verse", "Verse")
                         .WithMany("Transliterations")
                         .HasForeignKey("VerseId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Language");
 
@@ -1798,11 +1800,9 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Comment", b =>
                 {
-                    b.Navigation("CommentNote")
-                        .IsRequired();
+                    b.Navigation("CommentNote");
 
-                    b.Navigation("CommentVerse")
-                        .IsRequired();
+                    b.Navigation("CommentVerse");
 
                     b.Navigation("LikeComments");
 
@@ -1835,11 +1835,9 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Like", b =>
                 {
-                    b.Navigation("LikeComment")
-                        .IsRequired();
+                    b.Navigation("LikeComment");
 
-                    b.Navigation("LikeNote")
-                        .IsRequired();
+                    b.Navigation("LikeNote");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Note", b =>
