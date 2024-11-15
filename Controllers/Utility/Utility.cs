@@ -2,6 +2,8 @@ public static class Utility
 {
     public const short MIN_LENGTH_FOR_ROOT = 1;
     public const short MAX_LENGTH_FOR_ROOT = 5;
+
+
     public class ScriptureDataType : Dictionary<short, Scripture> { }
 
     public class Scripture

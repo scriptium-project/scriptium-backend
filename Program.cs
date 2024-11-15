@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
+using writings_backend_dotnet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; //Preventing Cycles
 });
+
+builder.Services.AddScoped<ICacheService, CacheService>();
+
 
 builder.Services.AddValidatorsFromAssemblyContaining<VerseValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<RootValidator>();

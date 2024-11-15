@@ -1,4 +1,7 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using writings_backend_dotnet.DTOs;
 using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Models.Util;
 
@@ -1250,6 +1253,9 @@ namespace writings_backend_dotnet.DB
 
                         Cache.Property(e => e.Data)
                         .HasColumnType("jsonb").IsRequired();
+
+                        Cache.Property(e => e.ExpirationDate)
+                        .HasColumnType("timestamp").HasDefaultValueSql("CURRENT_TIMESTAMP").IsRequired();
                   });
 
                   modelBuilder.Entity<Suggestion>(Suggestion =>

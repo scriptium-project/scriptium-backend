@@ -5,27 +5,27 @@ using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.DTOs;
 using writings_backend_dotnet.Models;
+using writings_backend_dotnet.Services;
 
 namespace writings_backend_dotnet.Controllers.VerseHandler
 {
     [ApiController, Route("verse/")]
-    public class VerseController(ApplicationDBContext db) : ControllerBase
+    public class VerseController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db;
+        private readonly ICacheService _cacheService = cacheService;
 
         [HttpGet("{ScriptureNumber}/{SectionNumber}/{ChapterNumber}/{VerseNumber}")]
         public async Task<IActionResult> GetVerse([FromRoute] VerseValidatedDTO dto)
         {
+            VerseSimpleDTO data;
+
             string requestPath = Request.Path.ToString();
-            Cache? cache = await _db.Cache.FirstOrDefaultAsync(c => c.Key == requestPath);
+            VerseSimpleDTO? cache = await _cacheService.GetCachedDataAsync<VerseSimpleDTO>(requestPath);
 
             if (cache != null)  //Checking cache
-            {
-                string jsonString = cache.Data.RootElement.GetRawText();
-                VerseSimpleDTO deserializedData = JsonSerializer.Deserialize<VerseSimpleDTO>(jsonString)!; //Since the cache is not null, this deserialization is unlikely to produce an object type other than VerseSimpleDTO.
+                return Ok(new { data = cache });
 
-                return Ok(new { data = deserializedData });
-            }
 
             //Dynamic including, via .Select() can also be used.
             Verse? verse = await _db.Verse.AsNoTracking().IgnoreAutoIncludes() //AsNoTracking is used for avoid auto inclusion. 
@@ -45,31 +45,19 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
                                             .Include(v => v.TranslationTexts).ThenInclude(t => t.FootNotes).ThenInclude(f => f.FootNoteText)
                                             .FirstOrDefaultAsync(v => v.Number == dto.VerseNumber);
 
+
             if (verse == null) return NotFound("There is no verse matches with this information.");
 
-            VerseSimpleDTO existedVerse = verse.ToVerseSimpleDTO();
+            data = verse.ToVerseSimpleDTO();
 
-            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(existedVerse);
-            var JSON = JsonDocument.Parse(jsonBytes); //Caching
 
-            await _db.Cache.AddAsync(new Cache { Key = requestPath, Data = JSON });
-            await _db.SaveChangesAsync();
-            var result = new
-            {
-                data = new
-                {
-                    verse = existedVerse
-                }
-            };
+            await _cacheService.SetCacheDataAsync(requestPath, data);
+
+            var result = new { data };
 
             return Ok(result);
         }
 
 
-        [HttpGet]
-        public IActionResult GetVerse1()
-        {
-            return Ok(new Dictionary<string, string> { { "sa", "sa" } });
-        }
     }
 }
