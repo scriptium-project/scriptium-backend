@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
@@ -8,17 +9,18 @@ namespace writings_backend_dotnet.Models
         [Key, Column("id")]
         public int Id { get; set; }
 
-        [Required]
+        [Required, Column("meaning", TypeName = DBTypeVARCHAR100)]
         public required string Meaning { get; set; }
 
-        [Required]
-        public required short SectionId { get; set; }
+        [Required,Column("section_id", TypeName = DBType16bitInteger)]
+        public short SectionId { get; set; }
 
-        public required Section Section { get; set; }
+        public virtual Section Section { get; set; }  = null!;
 
-        public short LanguageId { get; set; }
+        [Required, Column("language_id", TypeName = DBType8bitInteger)]
+        public byte LanguageId { get; set; }
 
-        public required Language Language { get; set; }
+        public virtual Language Language { get; set; }  = null!;
 
     }
 }

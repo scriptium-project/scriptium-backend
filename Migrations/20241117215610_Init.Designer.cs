@@ -2,9 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using writings_backend_dotnet.DB;
 
 #nullable disable
@@ -12,7 +12,7 @@ using writings_backend_dotnet.DB;
 namespace writings_backend_dotnet.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20241112180734_Init")]
+    [Migration("20241117215610_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -21,74 +21,32 @@ namespace writings_backend_dotnet.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Follow", b =>
+            modelBuilder.Entity("writings_backend_dotnet.FreezeR", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<Guid>("FollowedId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("followed_id");
-
-                    b.Property<Guid>("FollowerId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("follower_id");
-
-                    b.Property<DateTime>("OccurredAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
-                        .HasColumnName("occurred_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Accepted")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FollowedId");
-
-                    b.HasIndex("FollowerId", "FollowedId")
-                        .IsUnique();
-
-                    b.ToTable("follow", (string)null);
-                });
-
-            modelBuilder.Entity("FreezeR", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("ProceedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("proceed_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("Frozen")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
@@ -105,25 +63,25 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<DateTime?>("BlockedAt")
+                    b.Property<DateTime>("BlockedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("blocked_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<Guid>("BlockedId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("blocked_id");
 
                     b.Property<Guid>("BlockerId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("blocker_id");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasColumnType("VARCHAR(100)")
                         .HasColumnName("reason");
 
                     b.HasKey("Id");
@@ -140,46 +98,73 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Data")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnName("data");
 
                     b.Property<DateTime>("ExpirationDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(126)
-                        .HasColumnType("character varying(126)");
+                        .HasColumnType("VARCHAR(126)")
+                        .HasColumnName("key");
 
                     b.HasKey("Id");
 
                     b.ToTable("cache", (string)null);
                 });
 
-            modelBuilder.Entity("writings_backend_dotnet.Models.Chapter", b =>
+            modelBuilder.Entity("writings_backend_dotnet.Models.CacheR", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CacheId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cache_id");
+
+                    b.Property<DateTime>("FetchedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fetched_at")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CacheId");
+
+                    b.ToTable("cache_r", (string)null);
+                });
+
+            modelBuilder.Entity("writings_backend_dotnet.Models.Chapter", b =>
+                {
+                    b.Property<short>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(250)")
-                        .HasColumnName("chapter_name");
+                        .HasColumnType("VARCHAR(100)")
+                        .HasColumnName("name");
 
-                    b.Property<short>("Number")
-                        .HasColumnType("smallint")
-                        .HasColumnName("chapter_number");
+                    b.Property<byte>("Number")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("number");
 
                     b.Property<short>("SectionId")
                         .HasColumnType("smallint")
@@ -200,21 +185,23 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ChapterId")
-                        .HasColumnType("integer");
+                    b.Property<short>("ChapterId")
+                        .HasColumnType("smallint")
+                        .HasColumnName("chapter_id");
 
-                    b.Property<short>("LanguageId")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("LanguageId")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("language_id");
 
                     b.Property<string>("Meaning")
                         .IsRequired()
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("chapter_meaning");
+                        .HasColumnType("VARCHAR(100)")
+                        .HasColumnName("meaning");
 
                     b.HasKey("Id");
 
@@ -230,31 +217,31 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Description")
                         .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
+                        .HasColumnType("VARCHAR(250)")
                         .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
+                        .HasColumnType("VARCHAR(100)")
                         .HasDefaultValue("")
                         .HasColumnName("name");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
@@ -272,25 +259,25 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<Guid>("CollectionId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("collection_id");
 
                     b.Property<string>("Note")
                         .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
+                        .HasColumnType("VARCHAR(250)")
                         .HasColumnName("note");
 
                     b.Property<DateTime>("SavedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("saved_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<int>("VerseId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("verse_id");
 
                     b.HasKey("Id");
@@ -310,7 +297,7 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long?>("CommentNoteId")
                         .HasColumnType("bigint");
@@ -320,9 +307,9 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<long?>("ParentCommentId")
                         .HasColumnType("bigint")
@@ -331,15 +318,15 @@ namespace writings_backend_dotnet.Migrations
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
+                        .HasColumnType("VARCHAR(500)")
                         .HasColumnName("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
@@ -357,8 +344,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("comment_id");
 
-                    b.Property<int>("NoteId")
-                        .HasColumnType("integer")
+                    b.Property<long>("NoteId")
+                        .HasColumnType("bigint")
                         .HasColumnName("note_id");
 
                     b.HasKey("CommentId");
@@ -375,7 +362,7 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnName("comment_id");
 
                     b.Property<int>("VerseId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("verse_id");
 
                     b.HasKey("CommentId");
@@ -385,6 +372,82 @@ namespace writings_backend_dotnet.Migrations
                     b.ToTable("comment_verse", (string)null);
                 });
 
+            modelBuilder.Entity("writings_backend_dotnet.Models.Follow", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<Guid>("FollowedId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("followed_id");
+
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("follower_id");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("occurred_at")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowedId");
+
+                    b.HasIndex("FollowerId", "FollowedId")
+                        .IsUnique();
+
+                    b.ToTable("follow", (string)null);
+                });
+
+            modelBuilder.Entity("writings_backend_dotnet.Models.FollowR", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<Guid>("FollowedId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("followed_id");
+
+                    b.Property<Guid>("FollowerId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("follower_id");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("occurred_at")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FollowedId");
+
+                    b.HasIndex("FollowerId", "FollowedId")
+                        .IsUnique();
+
+                    b.ToTable("follow_r", (string)null);
+                });
+
             modelBuilder.Entity("writings_backend_dotnet.Models.FootNote", b =>
                 {
                     b.Property<long>("Id")
@@ -392,7 +455,7 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<long>("FootNoteTextId")
                         .HasColumnType("bigint")
@@ -428,12 +491,12 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text");
 
                     b.HasKey("Id");
 
@@ -442,24 +505,27 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Language", b =>
                 {
-                    b.Property<short>("Id")
+                    b.Property<byte>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
+                        .HasColumnType("tinyint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<byte>("Id"));
 
                     b.Property<string>("LangCode")
                         .IsRequired()
-                        .HasColumnType("varchar(2)");
+                        .HasColumnType("VARCHAR(2)")
+                        .HasColumnName("lang_code");
 
                     b.Property<string>("LangEnglish")
                         .IsRequired()
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("VARCHAR(20)")
+                        .HasColumnName("lang_english");
 
                     b.Property<string>("LangOwn")
                         .IsRequired()
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("VARCHAR(20)")
+                        .HasColumnName("lang_own");
 
                     b.HasKey("Id");
 
@@ -471,14 +537,14 @@ namespace writings_backend_dotnet.Migrations
                     b.HasData(
                         new
                         {
-                            Id = (short)1,
+                            Id = (byte)1,
                             LangCode = "en",
                             LangEnglish = "English",
                             LangOwn = "English"
                         },
                         new
                         {
-                            Id = (short)2,
+                            Id = (byte)2,
                             LangCode = "de",
                             LangEnglish = "German",
                             LangOwn = "Deutsch"
@@ -492,16 +558,16 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
@@ -525,17 +591,17 @@ namespace writings_backend_dotnet.Migrations
 
                     b.HasIndex("CommentId");
 
-                    b.HasIndex("LikeId", "CommentId")
-                        .IsUnique();
-
                     b.ToTable("like_comment", (string)null);
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.LikeNote", b =>
                 {
                     b.Property<long>("LikeId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("likeId");
+                        .HasColumnName("like_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("LikeId"));
 
                     b.Property<long>("NoteId")
                         .HasColumnType("bigint")
@@ -543,9 +609,7 @@ namespace writings_backend_dotnet.Migrations
 
                     b.HasKey("LikeId");
 
-                    b.HasIndex("NoteId");
-
-                    b.HasIndex("LikeId", "NoteId")
+                    b.HasIndex("NoteId")
                         .IsUnique();
 
                     b.ToTable("like_note", (string)null);
@@ -558,36 +622,37 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("user_id");
 
                     b.Property<int>("VerseId")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("verse_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("VerseId");
+                    b.HasIndex("VerseId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("note", (string)null);
                 });
@@ -599,39 +664,39 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<Guid>("ActorId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("actor_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<Guid?>("EntityId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("EntityType")
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("entity_type");
 
                     b.Property<bool>("IsRead")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
+                        .HasColumnType("bit")
                         .HasDefaultValue(false)
                         .HasColumnName("is_read");
 
                     b.Property<string>("NotificationType")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("notification_type");
 
                     b.Property<Guid>("RecipientId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("recipient_id");
 
                     b.HasKey("Id");
@@ -643,42 +708,6 @@ namespace writings_backend_dotnet.Migrations
                     b.ToTable("notification", (string)null);
                 });
 
-            modelBuilder.Entity("writings_backend_dotnet.Models.RequestLog", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasMaxLength(126)
-                        .HasColumnType("character varying(126)");
-
-                    b.Property<string>("Identifier")
-                        .IsRequired()
-                        .HasMaxLength(126)
-                        .HasColumnType("character varying(126)");
-
-                    b.Property<string>("Method")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<DateTime>("OccurredAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<int>("StatusCode")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("request_logs", (string)null);
-                });
-
             modelBuilder.Entity("writings_backend_dotnet.Models.Role", b =>
                 {
                     b.Property<short>("Id")
@@ -686,20 +715,17 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("role_name");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RoleName")
-                        .IsUnique();
 
                     b.ToTable("role", (string)null);
 
@@ -718,25 +744,27 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Root", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Latin")
                         .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
+                        .HasColumnType("VARCHAR(5)")
+                        .HasColumnName("latin");
 
                     b.Property<string>("Own")
                         .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
+                        .HasColumnType("VARCHAR(5)")
+                        .HasColumnName("[own]");
 
-                    b.Property<short>("ScriptureId")
-                        .HasColumnType("smallint")
+                    b.Property<byte>("ScriptureId")
+                        .HasColumnType("tinyint")
                         .HasColumnName("scripture_id");
 
                     b.HasKey("Id");
@@ -751,24 +779,25 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Scripture", b =>
                 {
-                    b.Property<short>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
+                    b.Property<byte>("Id")
+                        .HasColumnType("tinyint")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(1)
-                        .HasColumnType("char(1)");
+                        .HasColumnType("CHAR(1)")
+                        .HasColumnName("code");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("VARCHAR(50)")
+                        .HasColumnName("name");
 
-                    b.Property<short>("Number")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("Number")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("number");
 
                     b.HasKey("Id");
 
@@ -783,22 +812,24 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.ScriptureMeaning", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<short>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<short>("LanguageId")
                         .HasColumnType("smallint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
+
+                    b.Property<byte>("LanguageId")
+                        .HasColumnType("tinyint")
                         .HasColumnName("language_id");
 
                     b.Property<string>("Meaning")
                         .IsRequired()
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("VARCHAR(50)")
+                        .HasColumnName("meaning");
 
-                    b.Property<short>("ScriptureId")
-                        .HasColumnType("smallint")
+                    b.Property<byte>("ScriptureId")
+                        .HasColumnType("tinyint")
                         .HasColumnName("scripture_id");
 
                     b.HasKey("Id");
@@ -818,19 +849,19 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("section_name");
+                        .HasColumnType("VARCHAR(100)")
+                        .HasColumnName("name");
 
                     b.Property<short>("Number")
                         .HasColumnType("smallint")
-                        .HasColumnName("section_number");
+                        .HasColumnName("number");
 
-                    b.Property<short>("ScriptureId")
-                        .HasColumnType("smallint")
+                    b.Property<byte>("ScriptureId")
+                        .HasColumnType("tinyint")
                         .HasColumnName("scripture_id");
 
                     b.HasKey("Id");
@@ -846,22 +877,25 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.SectionMeaning", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<short>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
-                    b.Property<short>("LanguageId")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("LanguageId")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("language_id");
 
                     b.Property<string>("Meaning")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("VARCHAR(100)")
+                        .HasColumnName("meaning");
 
                     b.Property<short>("SectionId")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("section_id");
 
                     b.HasKey("Id");
 
@@ -875,29 +909,24 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Session", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("id");
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("ExpiresAt")
-                        .IsRequired()
-                        .HasColumnType("timestamp")
-                        .HasColumnName("expires_at");
-
-                    b.Property<string>("SessionData")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("session");
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Key");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("session", (string)null);
+                    b.ToTable("session");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Suggestion", b =>
@@ -906,27 +935,33 @@ namespace writings_backend_dotnet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("SuggestionText")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("VARCHAR(500)")
+                        .HasColumnName("suggestion_text");
 
                     b.Property<long>("TranslationTextId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("TranslationTextId1")
+                        .HasColumnType("bigint");
+
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TranslationTextId");
+
+                    b.HasIndex("TranslationTextId1");
 
                     b.HasIndex("UserId", "TranslationTextId")
                         .IsUnique();
@@ -941,32 +976,32 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
                     b.Property<DateTime>("AddedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("added_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<DateTime?>("EagerFrom")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("eager_from");
 
-                    b.Property<short>("LanguageId")
+                    b.Property<byte>("LanguageId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasDefaultValue((short)1)
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)1)
                         .HasColumnName("language_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("varchar(300)")
-                        .HasColumnName("translation_name");
+                        .HasColumnType("VARCHAR(250)")
+                        .HasColumnName("name");
 
                     b.Property<DateTime?>("ProductionTime")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("production_year");
 
                     b.HasKey("Id");
@@ -983,12 +1018,12 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text");
 
                     b.Property<short>("TranslationId")
                         .HasColumnType("smallint")
@@ -1014,32 +1049,31 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<short>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1500)
-                        .HasColumnType("varchar(1500)")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("description");
 
-                    b.Property<short>("LanguageId")
-                        .HasColumnType("smallint")
+                    b.Property<byte>("LanguageId")
+                        .HasColumnType("tinyint")
                         .HasColumnName("language_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
-                        .HasColumnType("varchar(250)")
-                        .HasColumnName("translator_name");
+                        .HasColumnType("VARCHAR(250)")
+                        .HasColumnName("name");
 
                     b.Property<string>("Url")
-                        .HasMaxLength(1500)
-                        .HasColumnType("varchar(1500)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("url");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LanguageId");
 
-                    b.ToTable("translators", (string)null);
+                    b.ToTable("translator", (string)null);
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.TranslatorTranslation", b =>
@@ -1054,9 +1088,9 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<DateTime>("AssignedOn")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("assigned_on")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.HasKey("TranslatorId", "TranslationId");
 
@@ -1069,102 +1103,105 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<short>("LanguageId")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("LanguageId")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("language_id");
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(1500)
-                        .HasColumnType("varchar(1500)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text");
 
                     b.Property<int>("VerseId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int")
+                        .HasColumnName("verse_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LanguageId");
 
-                    b.HasIndex("VerseId");
+                    b.HasIndex("VerseId", "LanguageId")
+                        .IsUnique();
 
-                    b.ToTable("transliterations", (string)null);
+                    b.ToTable("transliteration", (string)null);
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("uniqueidentifier")
                         .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Biography")
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<DateTime?>("EmailVerified")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Gender")
                         .HasMaxLength(1)
-                        .HasColumnType("character varying(1)");
+                        .HasColumnType("nvarchar(1)");
 
                     b.Property<DateTime?>("IsFrozen")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("is_frozen");
 
                     b.Property<DateTime?>("IsPrivate")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("is_private");
 
                     b.Property<DateTime?>("LastActive")
-                        .HasColumnType("timestamp")
+                        .HasColumnType("datetime")
                         .HasColumnName("last_active");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("nvarchar(255)");
 
-                    b.Property<short>("PreferredLanguageId")
+                    b.Property<byte>("PreferredLanguageId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasDefaultValue((short)1)
+                        .HasColumnType("tinyint")
+                        .HasDefaultValue((byte)1)
                         .HasColumnName("preferred_languageId");
 
                     b.Property<short?>("RoleId")
-                        .HasColumnType("smallint")
-                        .HasColumnName("role_id");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasColumnType("nvarchar(24)")
+                        .HasColumnName("username");
 
                     b.HasKey("Id");
 
@@ -1185,29 +1222,33 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ChapterId")
-                        .HasColumnType("integer");
+                    b.Property<short>("ChapterId")
+                        .HasColumnType("smallint")
+                        .HasColumnName("chapter_id");
 
                     b.Property<short>("Number")
                         .HasColumnType("smallint")
-                        .HasColumnName("verse_number");
+                        .HasColumnName("number");
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TextNoVowel")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text");
 
                     b.Property<string>("TextSimplified")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text_simplified");
+
+                    b.Property<string>("TextWithoutVowel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("text_without_vowel");
 
                     b.HasKey("Id");
 
@@ -1224,10 +1265,11 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<int?>("RootId")
-                        .HasColumnType("integer");
+                    b.Property<long?>("RootId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("root_id");
 
                     b.Property<short>("SequenceNumber")
                         .HasColumnType("smallint")
@@ -1235,16 +1277,23 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TextNoVowel")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("VARCHAR(50)")
+                        .HasColumnName("text");
 
                     b.Property<string>("TextSimplified")
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("VARCHAR(50)")
+                        .HasColumnName("text_simplified");
+
+                    b.Property<string>("TextWithoutVowel")
+                        .HasMaxLength(50)
+                        .HasColumnType("VARCHAR(50)")
+                        .HasColumnName("text_without_vowel");
 
                     b.Property<int>("VerseId")
-                        .HasColumnType("integer");
+                        .HasColumnType("int")
+                        .HasColumnName("verse_id");
 
                     b.HasKey("Id");
 
@@ -1265,19 +1314,21 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<short>("LanguageId")
-                        .HasColumnType("smallint");
+                    b.Property<byte>("LanguageId")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("language_id");
 
                     b.Property<string>("Meaning")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("word_meaning");
+                        .HasColumnType("VARCHAR(100)")
+                        .HasColumnName("meaning");
 
                     b.Property<long>("WordId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("word_id");
 
                     b.HasKey("Id");
 
@@ -1285,29 +1336,10 @@ namespace writings_backend_dotnet.Migrations
 
                     b.HasIndex("WordId");
 
-                    b.ToTable("word_meanings", (string)null);
+                    b.ToTable("word_meaning", (string)null);
                 });
 
-            modelBuilder.Entity("Follow", b =>
-                {
-                    b.HasOne("writings_backend_dotnet.Models.User", "Followed")
-                        .WithMany("Followers")
-                        .HasForeignKey("FollowedId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("writings_backend_dotnet.Models.User", "Follower")
-                        .WithMany("Following")
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Followed");
-
-                    b.Navigation("Follower");
-                });
-
-            modelBuilder.Entity("FreezeR", b =>
+            modelBuilder.Entity("writings_backend_dotnet.FreezeR", b =>
                 {
                     b.HasOne("writings_backend_dotnet.Models.User", "User")
                         .WithMany("FreezeRecords")
@@ -1323,18 +1355,29 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.User", "Blocked")
                         .WithMany("BlockedByUsers")
                         .HasForeignKey("BlockedId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.User", "Blocker")
                         .WithMany("BlockedUsers")
                         .HasForeignKey("BlockerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Blocked");
 
                     b.Navigation("Blocker");
+                });
+
+            modelBuilder.Entity("writings_backend_dotnet.Models.CacheR", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.Cache", "Cache")
+                        .WithMany("CacheRs")
+                        .HasForeignKey("CacheId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Cache");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Chapter", b =>
@@ -1357,7 +1400,7 @@ namespace writings_backend_dotnet.Migrations
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Language", "Language")
-                        .WithMany("ChapterMeaning")
+                        .WithMany("ChapterMeanings")
                         .HasForeignKey("LanguageId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1402,7 +1445,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Comment", "ParentComment")
                         .WithMany("Replies")
                         .HasForeignKey("ParentCommentId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("writings_backend_dotnet.Models.User", "User")
                         .WithMany("Comments")
@@ -1420,7 +1463,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Comment", "Comment")
                         .WithOne("CommentNote")
                         .HasForeignKey("writings_backend_dotnet.Models.CommentNote", "CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Note", "Note")
@@ -1439,7 +1482,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Comment", "Comment")
                         .WithOne("CommentVerse")
                         .HasForeignKey("writings_backend_dotnet.Models.CommentVerse", "CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Verse", "Verse")
@@ -1451,6 +1494,44 @@ namespace writings_backend_dotnet.Migrations
                     b.Navigation("Comment");
 
                     b.Navigation("Verse");
+                });
+
+            modelBuilder.Entity("writings_backend_dotnet.Models.Follow", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.User", "Followed")
+                        .WithMany("Followers")
+                        .HasForeignKey("FollowedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("writings_backend_dotnet.Models.User", "Follower")
+                        .WithMany("Following")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Followed");
+
+                    b.Navigation("Follower");
+                });
+
+            modelBuilder.Entity("writings_backend_dotnet.Models.FollowR", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.User", "Followed")
+                        .WithMany("FollowerRs")
+                        .HasForeignKey("FollowedId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("writings_backend_dotnet.Models.User", "Follower")
+                        .WithMany("FollowRing")
+                        .HasForeignKey("FollowerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Followed");
+
+                    b.Navigation("Follower");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.FootNote", b =>
@@ -1477,7 +1558,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.User", "User")
                         .WithMany("Likes")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -1506,12 +1587,12 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.HasOne("writings_backend_dotnet.Models.Like", "Like")
                         .WithOne("LikeNote")
-                        .HasForeignKey("writings_backend_dotnet.Models.LikeNote", "LikeId")
+                        .HasForeignKey("writings_backend_dotnet.Models.LikeNote", "NoteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Note", "Note")
-                        .WithMany("LikeNotes")
+                        .WithMany("Likes")
                         .HasForeignKey("NoteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1545,13 +1626,13 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.User", "Actor")
                         .WithMany("NotificationsSent")
                         .HasForeignKey("ActorId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.User", "Recipient")
                         .WithMany("NotificationsReceived")
                         .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Actor");
@@ -1575,7 +1656,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Language", "Language")
                         .WithMany("ScriptureMeanings")
                         .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Scripture", "Scripture")
@@ -1621,12 +1702,9 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Session", b =>
                 {
-                    b.HasOne("writings_backend_dotnet.Models.User", "User")
+                    b.HasOne("writings_backend_dotnet.Models.User", null)
                         .WithMany("Sessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("User");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Suggestion", b =>
@@ -1637,8 +1715,12 @@ namespace writings_backend_dotnet.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("writings_backend_dotnet.Models.TranslationText", null)
+                        .WithMany("Suggestions")
+                        .HasForeignKey("TranslationTextId1");
+
                     b.HasOne("writings_backend_dotnet.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Suggestions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1670,7 +1752,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Verse", "Verse")
                         .WithMany("TranslationTexts")
                         .HasForeignKey("VerseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Translation");
@@ -1713,7 +1795,7 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Language", "Language")
                         .WithMany("Transliterations")
                         .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Verse", "Verse")
@@ -1737,8 +1819,7 @@ namespace writings_backend_dotnet.Migrations
 
                     b.HasOne("writings_backend_dotnet.Models.Role", "Role")
                         .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("RoleId");
 
                     b.Navigation("PreferredLanguage");
 
@@ -1779,18 +1860,23 @@ namespace writings_backend_dotnet.Migrations
                     b.HasOne("writings_backend_dotnet.Models.Language", "Language")
                         .WithMany("WordMeanings")
                         .HasForeignKey("LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("writings_backend_dotnet.Models.Word", "Word")
                         .WithMany("WordMeanings")
                         .HasForeignKey("WordId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Language");
 
                     b.Navigation("Word");
+                });
+
+            modelBuilder.Entity("writings_backend_dotnet.Models.Cache", b =>
+                {
+                    b.Navigation("CacheRs");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Chapter", b =>
@@ -1823,7 +1909,7 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Language", b =>
                 {
-                    b.Navigation("ChapterMeaning");
+                    b.Navigation("ChapterMeanings");
 
                     b.Navigation("PreferredUsers");
 
@@ -1851,7 +1937,7 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("LikeNotes");
+                    b.Navigation("Likes");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Role", b =>
@@ -1890,6 +1976,8 @@ namespace writings_backend_dotnet.Migrations
             modelBuilder.Entity("writings_backend_dotnet.Models.TranslationText", b =>
                 {
                     b.Navigation("FootNotes");
+
+                    b.Navigation("Suggestions");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Translator", b =>
@@ -1907,6 +1995,10 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Navigation("Comments");
 
+                    b.Navigation("FollowRing");
+
+                    b.Navigation("FollowerRs");
+
                     b.Navigation("Followers");
 
                     b.Navigation("Following");
@@ -1922,6 +2014,8 @@ namespace writings_backend_dotnet.Migrations
                     b.Navigation("NotificationsSent");
 
                     b.Navigation("Sessions");
+
+                    b.Navigation("Suggestions");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Verse", b =>

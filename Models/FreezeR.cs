@@ -3,7 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Models.Util;
 
-public class FreezeR
+namespace writings_backend_dotnet
+{
+
+
+    public class FreezeR
 {
     [Key]
     public long Id { get; set; }
@@ -18,5 +22,6 @@ public class FreezeR
     public DateTime ProceedAt { get; set; }
 
     [ForeignKey("UserId")]
-    public User? User { get; set; }
+    public virtual User User { get; set; } = null!;
+}
 }

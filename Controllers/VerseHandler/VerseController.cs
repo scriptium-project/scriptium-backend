@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
@@ -57,7 +56,6 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
 
             return Ok(result);
         }
-
 
     }
 }

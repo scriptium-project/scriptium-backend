@@ -1,34 +1,38 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
+
 
 namespace writings_backend_dotnet.Models
 {
     public class Word
     {
-        [Key, Column("id", TypeName = "bigint")]
+        [Key, Column("id", TypeName = DBType64bitInteger)]
         public long Id { get; set; }
 
-        [Required, Column("sequence_number", TypeName = "smallint")]
+        [Required, Column("sequence_number", TypeName = DBType16bitInteger)]
         public required short SequenceNumber { get; set; }
 
-        [Required]
+        [Required, Column("text", TypeName = DBTypeVARCHAR50), MaxLength(50)]
         public required string Text { get; set; }
 
-        public string? TextNoVowel { get; set; } = null!;
+        [Column("text_without_vowel", TypeName = DBTypeVARCHAR50), MaxLength(50)]
+        public string? TextWithoutVowel { get; set; }
 
-        public string? TextSimplified { get; set; } = null!;
+        [Column("text_simplified", TypeName = DBTypeVARCHAR50), MaxLength(50)]
+        public string? TextSimplified { get; set; }
 
-        [Required]
+        [Required, Column("verse_id", TypeName = DBType32bitInteger)]
         public int VerseId { get; set; }
 
-        public required Verse Verse { get; set; }
-
+        public virtual Verse Verse { get; set; } = null!;
+        
+        [Column("root_id", TypeName = DBType64bitInteger)]
         public int? RootId { get; set; } = null!;
 
-        public Root? Root { get; set; }
+        public virtual Root? Root { get; set; } = null!;
 
-        public List<WordMeaning>? WordMeanings { get; set; }
-
+        public virtual List<WordMeaning>? WordMeanings { get; set; }
 
     }
 }

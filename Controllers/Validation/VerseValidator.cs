@@ -1,4 +1,5 @@
 using FluentValidation;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {
@@ -18,7 +19,7 @@ namespace writings_backend_dotnet.Controllers.Validation
                     .Cascade(CascadeMode.Stop)
                     .Must(num => num >= 1)
                     .WithMessage("Scripture number is too small; minimum is 1.")
-                    .Must(Utility.SCRIPTURE_DATA.ContainsKey)
+                    .Must(SCRIPTURE_DATA.ContainsKey)
                     .WithMessage(x => $"Scripture number {x.ScriptureNumber} is not valid.");
 
             RuleFor(x => x.SectionNumber)
@@ -27,7 +28,7 @@ namespace writings_backend_dotnet.Controllers.Validation
                     .WithMessage("Section number is too small; minimum is 1.")
                 .Must((dto, sectionNumber) =>
                 {
-                    if (Utility.SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture))
+                    if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture))
                         return sectionNumber <= scripture.SectionCount;
                     return false;
                 })
@@ -39,7 +40,7 @@ namespace writings_backend_dotnet.Controllers.Validation
                     .WithMessage("Chapter number is too small; minimum is 1.")
                 .Must((dto, chapterNumber) =>
                 {
-                    if (Utility.SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
+                    if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
                         scripture.Sections.TryGetValue(dto.SectionNumber, out var section))
                         return chapterNumber <= section.ChapterCount;
 
@@ -53,7 +54,7 @@ namespace writings_backend_dotnet.Controllers.Validation
                     .WithMessage("Verse number is too small; minimum is 1.")
                 .Must((dto, verseNumber) =>
                 {
-                    if (Utility.SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
+                    if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
                         scripture.Sections.TryGetValue(dto.SectionNumber, out var section) &&
                         section.Chapters.TryGetValue(dto.ChapterNumber, out var chapter))
                         return verseNumber <= chapter.VerseCount;
@@ -65,7 +66,7 @@ namespace writings_backend_dotnet.Controllers.Validation
 
         private int GetSectionCount(VerseValidatedDTO dto)
         {
-            if (Utility.SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture))
+            if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture))
                 return scripture.SectionCount;
 
             return -1;
@@ -73,7 +74,7 @@ namespace writings_backend_dotnet.Controllers.Validation
 
         private int GetChapterCount(VerseValidatedDTO dto)
         {
-            if (Utility.SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
+            if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
                 scripture.Sections.TryGetValue(dto.SectionNumber, out var section))
                 return section.ChapterCount;
 
@@ -82,7 +83,7 @@ namespace writings_backend_dotnet.Controllers.Validation
 
         private int GetVerseCount(VerseValidatedDTO dto)
         {
-            if (Utility.SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
+            if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
                 scripture.Sections.TryGetValue(dto.SectionNumber, out var section) &&
                 section.Chapters.TryGetValue(dto.ChapterNumber, out var chapter))
                 return chapter.VerseCount;

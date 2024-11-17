@@ -12,11 +12,11 @@ namespace writings_backend_dotnet.Models
 
         public DateTime CreatedAt { get; set; }
 
-        public User? User { get; set; }
+        public virtual User User { get; set; } = null!;
 
-        public LikeComment? LikeComment { get; set; }
+        public virtual LikeComment? LikeComment { get; set; }
 
-        public LikeNote? LikeNote { get; set; }
+        public virtual LikeNote? LikeNote { get; set; }
     }
 
 }

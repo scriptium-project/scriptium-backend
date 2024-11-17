@@ -1,27 +1,28 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     public class Translator
     {
-        [Key, Column("id", TypeName = "smallint"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column("id", TypeName = DBType16bitInteger)]
         public short Id { get; set; }
 
-        [Required, Column("translator_name", TypeName = "varchar(250)"), MaxLength(250)]
-        public string Name { get; set; } = null!;
+        [Required, Column("name", TypeName = DBTypeVARCHAR250), MaxLength(250)]
+        public required string Name { get; set; } = null!;
 
-        [Column("description", TypeName = "varchar(1500)"), MaxLength(1500)]
+        [Column("description", TypeName = DBTypeVARCHARMAX)]
         public string? Description { get; set; }
 
-        [Column(TypeName = "varchar(1500)"), MaxLength(1500)]
+        [Column("url", TypeName = DBTypeVARCHARMAX)]
         public string? Url { get; set; }
 
         [Required, Column("language_id"), ForeignKey("Language")]
-        public short LanguageId { get; set; }
+        public byte LanguageId { get; set; }
 
-        public required Language Language { get; set; }
+        public virtual Language Language { get; set; } = null!;
 
-        public required List<TranslatorTranslation> TranslatorTranslations { get; set; }
+        public virtual List<TranslatorTranslation>? TranslatorTranslations { get; set; }
     }
 }

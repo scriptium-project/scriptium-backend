@@ -15,15 +15,15 @@ namespace writings_backend_dotnet.Models
         [Required]
         public Guid BlockedId { get; set; }
 
-        public DateTime? BlockedAt { get; set; }
+        public DateTime BlockedAt { get; set; } = DateTime.UtcNow;
 
         [MaxLength(100)]
         public string? Reason { get; set; }
 
         [ForeignKey("BlockerId")]
-        public User? Blocker { get; set; }
+        public virtual User Blocker { get; set; } = null!;
 
         [ForeignKey("BlockedId")]
-        public User? Blocked { get; set; }
+        public virtual User Blocked { get; set; } = null!;
     }
 }

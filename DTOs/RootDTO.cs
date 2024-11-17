@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.DTOs

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.DTOs
@@ -10,7 +6,7 @@ namespace writings_backend_dotnet.DTOs
     {
         public required short SequenceNumber { get; set; }
         public required string Text { get; set; }
-        public string? TextNoVowel { get; set; }
+        public string? TextWithoutVowel { get; set; }
         public string? TextSimplified { get; set; }
         public RootSimpleDTO? Root { get; set; }
     }
@@ -19,7 +15,7 @@ namespace writings_backend_dotnet.DTOs
     {
         public required short SequenceNumber { get; set; }
         public required string Text { get; set; }
-        public string? TextNoVowel { get; set; }
+        public string? TextWithoutVowel { get; set; }
         public string? TextSimplified { get; set; }
         public VerseSimpleDTO Verse { get; set; } = null!;
     }
@@ -33,7 +29,7 @@ namespace writings_backend_dotnet.DTOs
             {
                 SequenceNumber = word.SequenceNumber,
                 Text = word.Text,
-                TextNoVowel = word.TextNoVowel,
+                TextWithoutVowel = word.TextWithoutVowel,
                 TextSimplified = word.TextSimplified,
                 Root = word.Root?.ToRootSimpleDTO() ?? null
             };
@@ -45,7 +41,7 @@ namespace writings_backend_dotnet.DTOs
             {
                 SequenceNumber = word.SequenceNumber,
                 Text = word.Text,
-                TextNoVowel = word.TextNoVowel,
+                TextWithoutVowel = word.TextWithoutVowel,
                 TextSimplified = word.TextSimplified,
                 Verse = word.Verse.ToVerseSimpleDTO()
             };

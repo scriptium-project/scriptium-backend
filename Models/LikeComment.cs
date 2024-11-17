@@ -10,8 +10,8 @@ namespace writings_backend_dotnet.Models
         [Required]
         public long CommentId { get; set; }
 
-        public Like? Like { get; set; }
+        public virtual Like Like { get; set; } = null!;
 
-        public Comment? Comment { get; set; }
+        public virtual Comment Comment { get; set; } = null!;
     }
 }

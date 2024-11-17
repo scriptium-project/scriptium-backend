@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -18,15 +17,15 @@ namespace writings_backend_dotnet.Migrations
                 name: "cache",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Key = table.Column<string>(type: "character varying(126)", maxLength: 126, nullable: false),
-                    Data = table.Column<string>(type: "jsonb", nullable: false),
-                    ExpirationDate = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    key = table.Column<string>(type: "VARCHAR(126)", maxLength: 126, nullable: false),
+                    data = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false),
+                    ExpirationDate = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_cache", x => x.Id);
+                    table.PrimaryKey("PK_cache", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -34,8 +33,8 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Text = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    text = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,11 +45,11 @@ namespace writings_backend_dotnet.Migrations
                 name: "language",
                 columns: table => new
                 {
-                    id = table.Column<short>(type: "smallint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    LangEnglish = table.Column<string>(type: "varchar(20)", nullable: false),
-                    LangOwn = table.Column<string>(type: "varchar(20)", nullable: false),
-                    LangCode = table.Column<string>(type: "varchar(2)", nullable: false)
+                    id = table.Column<byte>(type: "tinyint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    lang_english = table.Column<string>(type: "VARCHAR(20)", nullable: false),
+                    lang_own = table.Column<string>(type: "VARCHAR(20)", nullable: false),
+                    lang_code = table.Column<string>(type: "VARCHAR(2)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,30 +57,13 @@ namespace writings_backend_dotnet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "request_logs",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Identifier = table.Column<string>(type: "character varying(126)", maxLength: 126, nullable: false),
-                    Endpoint = table.Column<string>(type: "character varying(126)", maxLength: 126, nullable: false),
-                    Method = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    StatusCode = table.Column<int>(type: "integer", nullable: false),
-                    OccurredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "NOW()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_request_logs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "role",
                 columns: table => new
                 {
                     id = table.Column<short>(type: "smallint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    role_name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    role_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -92,11 +74,10 @@ namespace writings_backend_dotnet.Migrations
                 name: "scripture",
                 columns: table => new
                 {
-                    id = table.Column<short>(type: "smallint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Code = table.Column<string>(type: "char(1)", maxLength: 1, nullable: false),
-                    Number = table.Column<short>(type: "smallint", nullable: false)
+                    id = table.Column<byte>(type: "tinyint", nullable: false),
+                    name = table.Column<string>(type: "VARCHAR(50)", maxLength: 50, nullable: false),
+                    code = table.Column<string>(type: "CHAR(1)", maxLength: 1, nullable: false),
+                    number = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -104,16 +85,36 @@ namespace writings_backend_dotnet.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "cache_r",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    cache_id = table.Column<long>(type: "bigint", nullable: false),
+                    fetched_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_cache_r", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_cache_r_cache_cache_id",
+                        column: x => x.cache_id,
+                        principalTable: "cache",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "translation",
                 columns: table => new
                 {
                     id = table.Column<short>(type: "smallint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    translation_name = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: false),
-                    production_year = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    added_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    eager_from = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    language_id = table.Column<short>(type: "smallint", nullable: false, defaultValue: (short)1)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    name = table.Column<string>(type: "VARCHAR(250)", maxLength: 300, nullable: false),
+                    production_year = table.Column<DateTime>(type: "datetime", nullable: true),
+                    added_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    eager_from = table.Column<DateTime>(type: "datetime", nullable: true),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false, defaultValue: (byte)1)
                 },
                 constraints: table =>
                 {
@@ -127,21 +128,21 @@ namespace writings_backend_dotnet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "translators",
+                name: "translator",
                 columns: table => new
                 {
                     id = table.Column<short>(type: "smallint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    translator_name = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
-                    description = table.Column<string>(type: "varchar(1500)", maxLength: 1500, nullable: true),
-                    Url = table.Column<string>(type: "varchar(1500)", maxLength: 1500, nullable: true),
-                    language_id = table.Column<short>(type: "smallint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    name = table.Column<string>(type: "VARCHAR(250)", maxLength: 250, nullable: false),
+                    description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_translators", x => x.id);
+                    table.PrimaryKey("PK_translator", x => x.id);
                     table.ForeignKey(
-                        name: "FK_translators_language_language_id",
+                        name: "FK_translator_language_language_id",
                         column: x => x.language_id,
                         principalTable: "language",
                         principalColumn: "id",
@@ -152,21 +153,21 @@ namespace writings_backend_dotnet.Migrations
                 name: "user",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    Username = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: false),
-                    Name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    Surname = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
-                    Gender = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: true),
-                    Biography = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    EmailVerified = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    Password = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    last_active = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    is_frozen = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    is_private = table.Column<DateTime>(type: "timestamp", nullable: true),
-                    role_id = table.Column<short>(type: "smallint", nullable: true),
-                    preferred_languageId = table.Column<short>(type: "smallint", nullable: false, defaultValue: (short)1)
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    username = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Surname = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(1)", maxLength: 1, nullable: true),
+                    Biography = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    EmailVerified = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    last_active = table.Column<DateTime>(type: "datetime", nullable: true),
+                    is_frozen = table.Column<DateTime>(type: "datetime", nullable: true),
+                    is_private = table.Column<DateTime>(type: "datetime", nullable: true),
+                    RoleId = table.Column<short>(type: "smallint", nullable: true),
+                    preferred_languageId = table.Column<byte>(type: "tinyint", nullable: false, defaultValue: (byte)1)
                 },
                 constraints: table =>
                 {
@@ -178,22 +179,21 @@ namespace writings_backend_dotnet.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_user_role_role_id",
-                        column: x => x.role_id,
+                        name: "FK_user_role_RoleId",
+                        column: x => x.RoleId,
                         principalTable: "role",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "root",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Latin = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
-                    Own = table.Column<string>(type: "character varying(5)", maxLength: 5, nullable: false),
-                    scripture_id = table.Column<short>(type: "smallint", nullable: false)
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    latin = table.Column<string>(type: "VARCHAR(5)", maxLength: 5, nullable: false),
+                    own = table.Column<string>(name: "[own]", type: "VARCHAR(5)", maxLength: 5, nullable: false),
+                    scripture_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -210,21 +210,21 @@ namespace writings_backend_dotnet.Migrations
                 name: "scripture_meaning",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Meaning = table.Column<string>(type: "varchar(50)", nullable: false),
-                    scripture_id = table.Column<short>(type: "smallint", nullable: false),
-                    language_id = table.Column<short>(type: "smallint", nullable: false)
+                    id = table.Column<short>(type: "smallint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    meaning = table.Column<string>(type: "VARCHAR(50)", nullable: false),
+                    scripture_id = table.Column<byte>(type: "tinyint", nullable: false),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_scripture_meaning", x => x.Id);
+                    table.PrimaryKey("PK_scripture_meaning", x => x.id);
                     table.ForeignKey(
                         name: "FK_scripture_meaning_language_language_id",
                         column: x => x.language_id,
                         principalTable: "language",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_scripture_meaning_scripture_scripture_id",
                         column: x => x.scripture_id,
@@ -238,10 +238,10 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<short>(type: "smallint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    section_name = table.Column<string>(type: "varchar(100)", nullable: false),
-                    section_number = table.Column<short>(type: "smallint", nullable: false),
-                    scripture_id = table.Column<short>(type: "smallint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    name = table.Column<string>(type: "VARCHAR(100)", nullable: false),
+                    number = table.Column<short>(type: "smallint", nullable: false),
+                    scripture_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -260,7 +260,7 @@ namespace writings_backend_dotnet.Migrations
                 {
                     translator_id = table.Column<short>(type: "smallint", nullable: false),
                     translation_id = table.Column<short>(type: "smallint", nullable: false),
-                    assigned_on = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    assigned_on = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
@@ -272,9 +272,9 @@ namespace writings_backend_dotnet.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_translator_translation_translators_translator_id",
+                        name: "FK_translator_translation_translator_translator_id",
                         column: x => x.translator_id,
-                        principalTable: "translators",
+                        principalTable: "translator",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -284,11 +284,11 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    blocker_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    blocked_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    blocked_at = table.Column<DateTime>(type: "timestamp", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    reason = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    blocker_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    blocked_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    blocked_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    reason = table.Column<string>(type: "VARCHAR(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -297,23 +297,25 @@ namespace writings_backend_dotnet.Migrations
                         name: "FK_block_user_blocked_id",
                         column: x => x.blocked_id,
                         principalTable: "user",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_block_user_blocker_id",
                         column: x => x.blocker_id,
                         principalTable: "user",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "collection",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false, defaultValue: ""),
-                    description = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
+                    name = table.Column<string>(type: "VARCHAR(100)", maxLength: 100, nullable: false, defaultValue: ""),
+                    description = table.Column<string>(type: "VARCHAR(250)", maxLength: 250, nullable: true),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
@@ -331,11 +333,11 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    text = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: true),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    text = table.Column<string>(type: "VARCHAR(500)", maxLength: 500, nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
                     parent_comment_id = table.Column<long>(type: "bigint", nullable: true),
                     CommentVerseId = table.Column<long>(type: "bigint", nullable: true),
                     CommentNoteId = table.Column<long>(type: "bigint", nullable: true)
@@ -348,7 +350,7 @@ namespace writings_backend_dotnet.Migrations
                         column: x => x.parent_comment_id,
                         principalTable: "comment",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_comment_user_user_id",
                         column: x => x.user_id,
@@ -362,11 +364,11 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    follower_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    followed_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    status = table.Column<string>(type: "text", nullable: false, defaultValue: "Accepted"),
-                    occurred_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    follower_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    followed_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    occurred_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
@@ -375,12 +377,42 @@ namespace writings_backend_dotnet.Migrations
                         name: "FK_follow_user_followed_id",
                         column: x => x.followed_id,
                         principalTable: "user",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_follow_user_follower_id",
                         column: x => x.follower_id,
                         principalTable: "user",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "follow_r",
+                columns: table => new
+                {
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    follower_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    followed_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    occurred_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_follow_r", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_follow_r_user_followed_id",
+                        column: x => x.followed_id,
+                        principalTable: "user",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_follow_r_user_follower_id",
+                        column: x => x.follower_id,
+                        principalTable: "user",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -388,10 +420,10 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    status = table.Column<string>(type: "text", nullable: false, defaultValue: "Frozen"),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    proceed_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    proceed_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
@@ -409,9 +441,9 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
                 {
@@ -421,7 +453,7 @@ namespace writings_backend_dotnet.Migrations
                         column: x => x.user_id,
                         principalTable: "user",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -429,14 +461,14 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    recipient_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    actor_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    notification_type = table.Column<string>(type: "text", nullable: false),
-                    entity_type = table.Column<string>(type: "text", nullable: true),
-                    entity_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    is_read = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    recipient_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    actor_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    notification_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    entity_type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    entity_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    is_read = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -445,42 +477,43 @@ namespace writings_backend_dotnet.Migrations
                         name: "FK_notification_user_actor_id",
                         column: x => x.actor_id,
                         principalTable: "user",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_notification_user_recipient_id",
                         column: x => x.recipient_id,
                         principalTable: "user",
-                        principalColumn: "id");
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "session",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "varchar(100)", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    expires_at = table.Column<DateTime>(type: "timestamp", nullable: false),
-                    session = table.Column<string>(type: "jsonb", nullable: false)
+                    Key = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_session", x => x.id);
+                    table.PrimaryKey("PK_session", x => x.Key);
                     table.ForeignKey(
-                        name: "FK_session_user_user_id",
-                        column: x => x.user_id,
+                        name: "FK_session_user_UserId",
+                        column: x => x.UserId,
                         principalTable: "user",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "chapter",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    chapter_name = table.Column<string>(type: "varchar(250)", nullable: false),
-                    chapter_number = table.Column<short>(type: "smallint", nullable: false),
+                    id = table.Column<short>(type: "smallint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    name = table.Column<string>(type: "VARCHAR(100)", nullable: false),
+                    number = table.Column<byte>(type: "tinyint", nullable: false),
                     section_id = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
@@ -498,24 +531,24 @@ namespace writings_backend_dotnet.Migrations
                 name: "section_meaning",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Meaning = table.Column<string>(type: "text", nullable: false),
-                    SectionId = table.Column<short>(type: "smallint", nullable: false),
-                    LanguageId = table.Column<short>(type: "smallint", nullable: false)
+                    id = table.Column<short>(type: "smallint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    meaning = table.Column<string>(type: "VARCHAR(100)", nullable: false),
+                    section_id = table.Column<short>(type: "smallint", nullable: false),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_section_meaning", x => x.id);
                     table.ForeignKey(
-                        name: "FK_section_meaning_language_LanguageId",
-                        column: x => x.LanguageId,
+                        name: "FK_section_meaning_language_language_id",
+                        column: x => x.language_id,
                         principalTable: "language",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_section_meaning_section_SectionId",
-                        column: x => x.SectionId,
+                        name: "FK_section_meaning_section_section_id",
+                        column: x => x.section_id,
                         principalTable: "section",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -549,24 +582,24 @@ namespace writings_backend_dotnet.Migrations
                 name: "chapter_meaning",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    chapter_meaning = table.Column<string>(type: "varchar(50)", nullable: false),
-                    ChapterId = table.Column<int>(type: "integer", nullable: false),
-                    LanguageId = table.Column<short>(type: "smallint", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    meaning = table.Column<string>(type: "VARCHAR(100)", nullable: false),
+                    chapter_id = table.Column<short>(type: "smallint", nullable: false),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_chapter_meaning", x => x.id);
                     table.ForeignKey(
-                        name: "FK_chapter_meaning_chapter_ChapterId",
-                        column: x => x.ChapterId,
+                        name: "FK_chapter_meaning_chapter_chapter_id",
+                        column: x => x.chapter_id,
                         principalTable: "chapter",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_chapter_meaning_language_LanguageId",
-                        column: x => x.LanguageId,
+                        name: "FK_chapter_meaning_language_language_id",
+                        column: x => x.language_id,
                         principalTable: "language",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -576,20 +609,20 @@ namespace writings_backend_dotnet.Migrations
                 name: "verse",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    verse_number = table.Column<short>(type: "smallint", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false),
-                    TextNoVowel = table.Column<string>(type: "text", nullable: false),
-                    TextSimplified = table.Column<string>(type: "text", nullable: false),
-                    ChapterId = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    number = table.Column<short>(type: "smallint", nullable: false),
+                    text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    text_without_vowel = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    text_simplified = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    chapter_id = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_verse", x => x.id);
                     table.ForeignKey(
-                        name: "FK_verse_chapter_ChapterId",
-                        column: x => x.ChapterId,
+                        name: "FK_verse_chapter_chapter_id",
+                        column: x => x.chapter_id,
                         principalTable: "chapter",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -600,11 +633,11 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    collection_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    verse_id = table.Column<int>(type: "integer", nullable: false),
-                    saved_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    note = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    collection_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    verse_id = table.Column<int>(type: "int", nullable: false),
+                    saved_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    note = table.Column<string>(type: "VARCHAR(250)", maxLength: 250, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -628,7 +661,7 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     comment_id = table.Column<long>(type: "bigint", nullable: false),
-                    verse_id = table.Column<int>(type: "integer", nullable: false)
+                    verse_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -638,7 +671,7 @@ namespace writings_backend_dotnet.Migrations
                         column: x => x.comment_id,
                         principalTable: "comment",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_comment_verse_verse_verse_id",
                         column: x => x.verse_id,
@@ -652,12 +685,12 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    text = table.Column<string>(type: "text", nullable: false),
-                    verse_id = table.Column<int>(type: "integer", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated_at = table.Column<DateTime>(type: "timestamp", nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    verse_id = table.Column<int>(type: "int", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -681,8 +714,8 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Text = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     translation_id = table.Column<short>(type: "smallint", nullable: false),
                     verse_id = table.Column<int>(type: "int", nullable: false)
                 },
@@ -700,31 +733,31 @@ namespace writings_backend_dotnet.Migrations
                         column: x => x.verse_id,
                         principalTable: "verse",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "transliterations",
+                name: "transliteration",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Text = table.Column<string>(type: "varchar(1500)", maxLength: 1500, nullable: false),
-                    LanguageId = table.Column<short>(type: "smallint", nullable: false),
-                    VerseId = table.Column<int>(type: "integer", nullable: false)
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false),
+                    verse_id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_transliterations", x => x.id);
+                    table.PrimaryKey("PK_transliteration", x => x.id);
                     table.ForeignKey(
-                        name: "FK_transliterations_language_LanguageId",
-                        column: x => x.LanguageId,
+                        name: "FK_transliteration_language_language_id",
+                        column: x => x.language_id,
                         principalTable: "language",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_transliterations_verse_VerseId",
-                        column: x => x.VerseId,
+                        name: "FK_transliteration_verse_verse_id",
+                        column: x => x.verse_id,
                         principalTable: "verse",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -735,26 +768,26 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     sequence_number = table.Column<short>(type: "smallint", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false),
-                    TextNoVowel = table.Column<string>(type: "text", nullable: true),
-                    TextSimplified = table.Column<string>(type: "text", nullable: true),
-                    VerseId = table.Column<int>(type: "integer", nullable: false),
-                    RootId = table.Column<int>(type: "integer", nullable: true)
+                    text = table.Column<string>(type: "VARCHAR(50)", maxLength: 50, nullable: false),
+                    text_without_vowel = table.Column<string>(type: "VARCHAR(50)", maxLength: 50, nullable: true),
+                    text_simplified = table.Column<string>(type: "VARCHAR(50)", maxLength: 50, nullable: true),
+                    verse_id = table.Column<int>(type: "int", nullable: false),
+                    root_id = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_word", x => x.id);
                     table.ForeignKey(
-                        name: "FK_word_root_RootId",
-                        column: x => x.RootId,
+                        name: "FK_word_root_root_id",
+                        column: x => x.root_id,
                         principalTable: "root",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_word_verse_VerseId",
-                        column: x => x.VerseId,
+                        name: "FK_word_verse_verse_id",
+                        column: x => x.verse_id,
                         principalTable: "verse",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -765,7 +798,7 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     comment_id = table.Column<long>(type: "bigint", nullable: false),
-                    note_id = table.Column<int>(type: "integer", nullable: false)
+                    note_id = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -775,7 +808,7 @@ namespace writings_backend_dotnet.Migrations
                         column: x => x.comment_id,
                         principalTable: "comment",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_comment_note_note_note_id",
                         column: x => x.note_id,
@@ -788,15 +821,16 @@ namespace writings_backend_dotnet.Migrations
                 name: "like_note",
                 columns: table => new
                 {
-                    likeId = table.Column<long>(type: "bigint", nullable: false),
+                    like_id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     note_id = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_like_note", x => x.likeId);
+                    table.PrimaryKey("PK_like_note", x => x.like_id);
                     table.ForeignKey(
-                        name: "FK_like_note_lke_likeId",
-                        column: x => x.likeId,
+                        name: "FK_like_note_lke_note_id",
+                        column: x => x.note_id,
                         principalTable: "lke",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -813,7 +847,7 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     number = table.Column<short>(type: "smallint", nullable: false),
                     index = table.Column<short>(type: "smallint", nullable: false),
                     footnote_text_id = table.Column<long>(type: "bigint", nullable: false),
@@ -841,11 +875,12 @@ namespace writings_backend_dotnet.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TranslationTextId = table.Column<long>(type: "bigint", nullable: false),
-                    SuggestionText = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
+                    suggestion_text = table.Column<string>(type: "VARCHAR(500)", maxLength: 500, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    TranslationTextId1 = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -857,6 +892,11 @@ namespace writings_backend_dotnet.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_suggestion_translation_text_TranslationTextId1",
+                        column: x => x.TranslationTextId1,
+                        principalTable: "translation_text",
+                        principalColumn: "id");
+                    table.ForeignKey(
                         name: "FK_suggestion_user_UserId",
                         column: x => x.UserId,
                         principalTable: "user",
@@ -865,39 +905,39 @@ namespace writings_backend_dotnet.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "word_meanings",
+                name: "word_meaning",
                 columns: table => new
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    word_meaning = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    WordId = table.Column<long>(type: "bigint", nullable: false),
-                    LanguageId = table.Column<short>(type: "smallint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    meaning = table.Column<string>(type: "VARCHAR(100)", maxLength: 100, nullable: false),
+                    word_id = table.Column<long>(type: "bigint", nullable: false),
+                    language_id = table.Column<byte>(type: "tinyint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_word_meanings", x => x.id);
+                    table.PrimaryKey("PK_word_meaning", x => x.id);
                     table.ForeignKey(
-                        name: "FK_word_meanings_language_LanguageId",
-                        column: x => x.LanguageId,
+                        name: "FK_word_meaning_language_language_id",
+                        column: x => x.language_id,
                         principalTable: "language",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_word_meanings_word_WordId",
-                        column: x => x.WordId,
+                        name: "FK_word_meaning_word_word_id",
+                        column: x => x.word_id,
                         principalTable: "word",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
                 table: "language",
-                columns: new[] { "id", "LangCode", "LangEnglish", "LangOwn" },
+                columns: new[] { "id", "lang_code", "lang_english", "lang_own" },
                 values: new object[,]
                 {
-                    { (short)1, "en", "English", "English" },
-                    { (short)2, "de", "German", "Deutsch" }
+                    { (byte)1, "en", "English", "English" },
+                    { (byte)2, "de", "German", "Deutsch" }
                 });
 
             migrationBuilder.InsertData(
@@ -921,27 +961,32 @@ namespace writings_backend_dotnet.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_chapter_chapter_name",
+                name: "IX_cache_r_cache_id",
+                table: "cache_r",
+                column: "cache_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chapter_name",
                 table: "chapter",
-                column: "chapter_name",
+                column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_chapter_section_id_chapter_number",
+                name: "IX_chapter_section_id_number",
                 table: "chapter",
-                columns: new[] { "section_id", "chapter_number" },
+                columns: new[] { "section_id", "number" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_chapter_meaning_ChapterId_LanguageId",
+                name: "IX_chapter_meaning_chapter_id_language_id",
                 table: "chapter_meaning",
-                columns: new[] { "ChapterId", "LanguageId" },
+                columns: new[] { "chapter_id", "language_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_chapter_meaning_LanguageId",
+                name: "IX_chapter_meaning_language_id",
                 table: "chapter_meaning",
-                column: "LanguageId");
+                column: "language_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_collection_user_id_name",
@@ -992,6 +1037,17 @@ namespace writings_backend_dotnet.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_follow_r_followed_id",
+                table: "follow_r",
+                column: "followed_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_follow_r_follower_id_followed_id",
+                table: "follow_r",
+                columns: new[] { "follower_id", "followed_id" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_footnote_footnote_text_id",
                 table: "footnote",
                 column: "footnote_text_id");
@@ -1012,9 +1068,9 @@ namespace writings_backend_dotnet.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_language_LangCode",
+                name: "IX_language_lang_code",
                 table: "language",
-                column: "LangCode",
+                column: "lang_code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -1023,21 +1079,10 @@ namespace writings_backend_dotnet.Migrations
                 column: "comment_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_like_comment_likeId_comment_id",
-                table: "like_comment",
-                columns: new[] { "likeId", "comment_id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_like_note_likeId_note_id",
-                table: "like_note",
-                columns: new[] { "likeId", "note_id" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_like_note_note_id",
                 table: "like_note",
-                column: "note_id");
+                column: "note_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_lke_user_id",
@@ -1050,9 +1095,10 @@ namespace writings_backend_dotnet.Migrations
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_note_verse_id",
+                name: "IX_note_verse_id_user_id",
                 table: "note",
-                column: "verse_id");
+                columns: new[] { "verse_id", "user_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_notification_actor_id",
@@ -1065,15 +1111,9 @@ namespace writings_backend_dotnet.Migrations
                 column: "recipient_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_role_role_name",
-                table: "role",
-                column: "role_name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_root_Latin_scripture_id",
+                name: "IX_root_latin_scripture_id",
                 table: "root",
-                columns: new[] { "Latin", "scripture_id" },
+                columns: new[] { "latin", "scripture_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -1082,15 +1122,15 @@ namespace writings_backend_dotnet.Migrations
                 column: "scripture_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_scripture_Code",
+                name: "IX_scripture_code",
                 table: "scripture",
-                column: "Code",
+                column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_scripture_Name",
+                name: "IX_scripture_name",
                 table: "scripture",
-                column: "Name",
+                column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -1105,37 +1145,42 @@ namespace writings_backend_dotnet.Migrations
                 column: "scripture_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_section_scripture_id_section_number",
+                name: "IX_section_name",
                 table: "section",
-                columns: new[] { "scripture_id", "section_number" },
+                column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_section_section_name",
+                name: "IX_section_scripture_id_number",
                 table: "section",
-                column: "section_name",
+                columns: new[] { "scripture_id", "number" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_section_meaning_LanguageId_SectionId",
+                name: "IX_section_meaning_language_id_section_id",
                 table: "section_meaning",
-                columns: new[] { "LanguageId", "SectionId" },
+                columns: new[] { "language_id", "section_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_section_meaning_SectionId",
+                name: "IX_section_meaning_section_id",
                 table: "section_meaning",
-                column: "SectionId");
+                column: "section_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_session_user_id",
+                name: "IX_session_UserId",
                 table: "session",
-                column: "user_id");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_suggestion_TranslationTextId",
                 table: "suggestion",
                 column: "TranslationTextId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_suggestion_TranslationTextId1",
+                table: "suggestion",
+                column: "TranslationTextId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_suggestion_UserId_TranslationTextId",
@@ -1159,24 +1204,25 @@ namespace writings_backend_dotnet.Migrations
                 column: "verse_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_translator_language_id",
+                table: "translator",
+                column: "language_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_translator_translation_translation_id",
                 table: "translator_translation",
                 column: "translation_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_translators_language_id",
-                table: "translators",
+                name: "IX_transliteration_language_id",
+                table: "transliteration",
                 column: "language_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_transliterations_LanguageId",
-                table: "transliterations",
-                column: "LanguageId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_transliterations_VerseId",
-                table: "transliterations",
-                column: "VerseId");
+                name: "IX_transliteration_verse_id_language_id",
+                table: "transliteration",
+                columns: new[] { "verse_id", "language_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_user_Email",
@@ -1190,47 +1236,47 @@ namespace writings_backend_dotnet.Migrations
                 column: "preferred_languageId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_user_role_id",
+                name: "IX_user_RoleId",
                 table: "user",
-                column: "role_id");
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_user_Username",
+                name: "IX_user_username",
                 table: "user",
-                column: "Username",
+                column: "username",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_verse_ChapterId_verse_number",
+                name: "IX_verse_chapter_id_number",
                 table: "verse",
-                columns: new[] { "ChapterId", "verse_number" },
+                columns: new[] { "chapter_id", "number" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_word_RootId",
+                name: "IX_word_root_id",
                 table: "word",
-                column: "RootId");
+                column: "root_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_word_sequence_number_VerseId",
+                name: "IX_word_sequence_number_verse_id",
                 table: "word",
-                columns: new[] { "sequence_number", "VerseId" },
+                columns: new[] { "sequence_number", "verse_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_word_VerseId",
+                name: "IX_word_verse_id",
                 table: "word",
-                column: "VerseId");
+                column: "verse_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_word_meanings_LanguageId",
-                table: "word_meanings",
-                column: "LanguageId");
+                name: "IX_word_meaning_language_id",
+                table: "word_meaning",
+                column: "language_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_word_meanings_WordId",
-                table: "word_meanings",
-                column: "WordId");
+                name: "IX_word_meaning_word_id",
+                table: "word_meaning",
+                column: "word_id");
         }
 
         /// <inheritdoc />
@@ -1240,7 +1286,7 @@ namespace writings_backend_dotnet.Migrations
                 name: "block");
 
             migrationBuilder.DropTable(
-                name: "cache");
+                name: "cache_r");
 
             migrationBuilder.DropTable(
                 name: "chapter_meaning");
@@ -1258,6 +1304,9 @@ namespace writings_backend_dotnet.Migrations
                 name: "follow");
 
             migrationBuilder.DropTable(
+                name: "follow_r");
+
+            migrationBuilder.DropTable(
                 name: "footnote");
 
             migrationBuilder.DropTable(
@@ -1271,9 +1320,6 @@ namespace writings_backend_dotnet.Migrations
 
             migrationBuilder.DropTable(
                 name: "notification");
-
-            migrationBuilder.DropTable(
-                name: "request_logs");
 
             migrationBuilder.DropTable(
                 name: "scripture_meaning");
@@ -1291,10 +1337,13 @@ namespace writings_backend_dotnet.Migrations
                 name: "translator_translation");
 
             migrationBuilder.DropTable(
-                name: "transliterations");
+                name: "transliteration");
 
             migrationBuilder.DropTable(
-                name: "word_meanings");
+                name: "word_meaning");
+
+            migrationBuilder.DropTable(
+                name: "cache");
 
             migrationBuilder.DropTable(
                 name: "collection");
@@ -1315,7 +1364,7 @@ namespace writings_backend_dotnet.Migrations
                 name: "translation_text");
 
             migrationBuilder.DropTable(
-                name: "translators");
+                name: "translator");
 
             migrationBuilder.DropTable(
                 name: "word");

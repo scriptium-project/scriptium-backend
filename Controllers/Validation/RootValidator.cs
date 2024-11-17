@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using FluentValidation;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {
@@ -20,9 +17,9 @@ namespace writings_backend_dotnet.Controllers.Validation
             .Cascade(CascadeMode.Stop)
             .Must(number => number >= 1)
             .WithMessage("Scripture number is too small; minimum is 1.")
-            .Must(Utility.SCRIPTURE_DATA.ContainsKey)
+            .Must(SCRIPTURE_DATA.ContainsKey)
             .WithMessage(r => $"Scripture number {r.ScriptureNumber} is not valid.");
-            RuleFor(r => r.RootLatin).MinimumLength(Utility.MIN_LENGTH_FOR_ROOT).MaximumLength(Utility.MAX_LENGTH_FOR_ROOT);
+            RuleFor(r => r.RootLatin).MinimumLength(MIN_LENGTH_FOR_ROOT).MaximumLength(MAX_LENGTH_FOR_ROOT);
 
         }
 

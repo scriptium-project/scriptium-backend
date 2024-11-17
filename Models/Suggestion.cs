@@ -21,8 +21,9 @@ namespace writings_backend_dotnet.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public User? User { get; set; }
-        public TranslationText? TranslationText { get; set; }
+        public virtual User User { get; set; } = null!;
+        
+        public virtual TranslationText TranslationText { get; set; } = null!;
     }
 
 }

@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Services
 {
@@ -21,16 +18,26 @@ namespace writings_backend_dotnet.Services
 
         public async Task<T?> GetCachedDataAsync<T>(string key)
         {
-            string? jsonString = await _db.Cache
-                .Where(c => c.Key == key && c.ExpirationDate < DateTime.Now + TimeSpan.FromSeconds(10))
-                .Select(c => c.Data)
+            var cache = await _db.Cache
+                .Where(c => c.Key == key && c.ExpirationDate > DateTime.UtcNow)
                 .FirstOrDefaultAsync();
 
-            if (jsonString == null) return default;
+            if (cache == null) return default;
 
             try
             {
-                T data = JsonSerializer.Deserialize<T>(jsonString)!;
+                T data = JsonSerializer.Deserialize<T>(cache.Data)!;
+
+                var cacheR = new CacheR
+                {
+                    CacheId = cache.Id,
+                    FetchedAt = DateTime.UtcNow
+                };
+
+                _db.CacheR.Add(cacheR);
+
+                await _db.SaveChangesAsync();
+
                 return data;
             }
             catch (JsonException ex)
@@ -40,7 +47,8 @@ namespace writings_backend_dotnet.Services
             }
         }
 
-        public async Task SetCacheDataAsync<T>(string key, T data)
+
+       public async Task SetCacheDataAsync<T>(string key, T data)
         {
             string jsonData = JsonSerializer.Serialize(data);
 
@@ -56,14 +64,23 @@ namespace writings_backend_dotnet.Services
                 var cacheEntry = new Cache
                 {
                     Key = key,
-                    Data = jsonData
+                    Data = jsonData,
+                    ExpirationDate = DateTime.UtcNow + TimeSpan.FromDays(1)
                 };
 
-                await _db.Cache.AddAsync(cacheEntry);
+                _db.Cache.Add(cacheEntry);
+
+                var cacheR = new CacheR
+                {   
+                    Cache = cacheEntry,
+                    FetchedAt = DateTime.UtcNow
+                };
+                _db.CacheR.Add(cacheR);
             }
 
             await _db.SaveChangesAsync();
         }
+
 
     }
 

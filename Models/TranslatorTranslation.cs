@@ -1,23 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     public class TranslatorTranslation
     {
-        [Required, Column("translator_id", TypeName = "smallint")]
+        [Required, Column("translator_id", TypeName = DBType16bitInteger)]
         public short TranslatorId { get; set; }
 
-        [Required, ForeignKey("TranslatorId")]
-        public required Translator Translator { get; set; }
+        [ForeignKey("TranslatorId")]
+        public virtual Translator Translator { get; set; } = null!;
 
-        [Required, Column("translation_id", TypeName = "smallint")]
+        [Required, Column("translation_id", TypeName = DBType16bitInteger)]
         public short TranslationId { get; set; }
 
-        [Required, ForeignKey("TranslationId")]
-        public required Translation Translation { get; set; }
+        [ForeignKey("TranslationId")]
+        public virtual Translation Translation { get; set; } = null!;
 
-        [Column("assigned_on")]
-        public DateTime AssignedOn { get; set; }
+        [Column("assigned_on", TypeName = DBTypeDateTime)]
+        public DateTime AssignedOn { get; set; } = DateTime.UtcNow;
     }
 }

@@ -11,24 +11,23 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.IgnoreNullValues = true;
-}).AddNewtonsoftJson(options =>
-{
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; //Preventing Cycles
-});
+builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+ builder.Services.AddControllers().AddJsonOptions(options =>
+ {
+      options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+ }).AddNewtonsoftJson(options =>
+ {
+     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore; // Preventing Cycles
+ });
+
 
 builder.Services.AddScoped<ICacheService, CacheService>();
 
 
 builder.Services.AddValidatorsFromAssemblyContaining<VerseValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<RootValidator>();
-
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
-{
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
 
 var app = builder.Build();
 

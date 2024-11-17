@@ -1,44 +1,45 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     [Table("comment")]
     public class Comment
     {
-        [Key, Column("id", TypeName = "bigint"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column("id", TypeName = DBType64bitInteger)]
         public long Id { get; set; }
 
-        [Required, ForeignKey("User"), Column("user_id", TypeName = "uuid")]
+        [Required, ForeignKey("User"), Column("user_id", TypeName = DBTypeUUID)]
         public Guid UserId { get; set; }
 
-        public User? User { get; set; }
+        public virtual User User { get; set; } = null!;
 
-        [Required, MaxLength(500), Column("text", TypeName = "varchar(500)")]
+        [Required, MaxLength(500), Column("text", TypeName = DBTypeVARCHAR500)]
         public string Text { get; set; } = null!;
 
-        [Column("created_at", TypeName = "timestamp"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedAt { get; set; }
+        [Column("created_at", TypeName = DBTypeDateTime)]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Column("updated_at", TypeName = "timestamp")]
+        [Column("updated_at", TypeName = DBTypeDateTime)]
         public DateTime? UpdatedAt { get; set; }
 
-        [ForeignKey("ParentComment"), Column("parent_comment_id", TypeName = "bigint")]
+        [ForeignKey("ParentComment"), Column("parent_comment_id", TypeName = DBType64bitInteger)]
         public long? ParentCommentId { get; set; }
 
-        public Comment? ParentComment { get; set; }
+        public virtual Comment? ParentComment { get; set; } = null!;
 
-        public List<Comment>? Replies { get; set; }
+        public virtual List<Comment>? Replies { get; set; }
 
         public long? CommentVerseId { get; set; } = null!;
 
-        public CommentVerse? CommentVerse { get; set; }
+        public virtual CommentVerse? CommentVerse { get; set; }
 
         public long? CommentNoteId { get; set; } = null!;
 
-        public CommentNote? CommentNote { get; set; }
+        public virtual CommentNote? CommentNote { get; set; }
 
-        public List<LikeComment>? LikeComments { get; set; }
+        public virtual List<LikeComment>? LikeComments { get; set; }
 
 
     }

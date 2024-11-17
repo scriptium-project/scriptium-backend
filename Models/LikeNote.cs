@@ -8,10 +8,10 @@ namespace writings_backend_dotnet.Models
         public long LikeId { get; set; }
 
         [Required]
-        public int NoteId { get; set; }
+        public long NoteId { get; set; }
 
-        public Like? Like { get; set; }
+        public virtual Like Like { get; set; } = null!;
 
-        public Note? Note { get; set; }
+        public virtual Note Note { get; set; } = null!;
     }
 }

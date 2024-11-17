@@ -9,16 +9,13 @@ namespace writings_backend_dotnet.Models
         [Key]
         public long Id { get; set; }
 
-        [Required]
-        [MaxLength(126)]
+        [Required, MaxLength(126)]
         public required string Identifier { get; set; }
 
-        [Required]
-        [MaxLength(126)]
+        [Required, MaxLength(126)]
         public required string Endpoint { get; set; }
 
-        [Required]
-        [MaxLength(10)]
+        [Required, MaxLength(10)]
         public required string Method { get; set; }
 
         [Required]

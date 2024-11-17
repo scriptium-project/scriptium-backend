@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
+
 
 namespace writings_backend_dotnet.Models
 {
@@ -8,33 +10,34 @@ namespace writings_backend_dotnet.Models
         [Key, Column("id")]
         public int Id { get; set; }
 
-        [Required, Column("verse_number", TypeName = "smallint")]
+        [Required, Column("number", TypeName = DBType16bitInteger)]
         public required short Number { get; set; }
 
-        [Required]
+        [Required, Column("text", TypeName = DBTypeVARCHARMAX)]
         public required string Text { get; set; }
 
-        [Required]
-        public required string TextNoVowel { get; set; }
-
+        [Column("text", TypeName = DBTypeVARCHARMAX)]
+        public required string TextWithoutVowel { get; set; }
+        
+        [Column("text", TypeName = DBTypeVARCHARMAX)]
         public string TextSimplified { get; set; } = null!;
 
-        [Required]
-        public required int ChapterId { get; set; }
+        [Required, Column("chapter_id", TypeName = DBType16bitInteger)]
+        public short ChapterId { get; set; }
 
-        public required Chapter Chapter { get; set; }
+        public virtual Chapter Chapter { get; set; } = null!;
 
-        public List<Word> Words { get; set; } = [];
+        public virtual List<Word> Words { get; set; } = [];
 
-        public List<Transliteration> Transliterations { get; set; } = [];
+        public virtual List<Transliteration> Transliterations { get; set; } = [];
 
-        public List<TranslationText> TranslationTexts { get; set; } = [];
+        public virtual List<TranslationText> TranslationTexts { get; set; } = [];
 
-        public List<CollectionVerse> CollectionVerses { get; set; } = [];
+        public virtual List<CollectionVerse> CollectionVerses { get; set; } =[];
 
-        public List<Note> Notes { get; set; } = [];
+        public virtual List<Note> Notes { get; set; } = [];
 
-        public List<CommentVerse> Comments { get; set; } = [];
+        public virtual List<CommentVerse> Comments { get; set; } = [];
 
 
     }

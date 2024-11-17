@@ -16,7 +16,7 @@ namespace writings_backend_dotnet.Models
         [Required]
         public NotificationType NotificationType { get; set; }
 
-        public EntityType? EntityType { get; set; }
+        public EntityType? EntityType { get; set; } 
 
         public Guid? EntityId { get; set; }
 
@@ -24,9 +24,9 @@ namespace writings_backend_dotnet.Models
 
         public bool IsRead { get; set; }
 
-        public User? Recipient { get; set; }
+        public virtual User Recipient { get; set; } = null!;
 
-        public User? Actor { get; set; }
+        public virtual User Actor { get; set; } = null!;
     }
 
 }

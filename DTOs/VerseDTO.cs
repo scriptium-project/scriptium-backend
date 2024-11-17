@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.DTOs
@@ -10,7 +6,7 @@ namespace writings_backend_dotnet.DTOs
     {
         public required short Number { get; set; }
         public required string Text { get; set; }
-        public required string TextNoVowel { get; set; }
+        public required string TextWithoutVowel { get; set; }
         public required string TextSimplified { get; set; }
         public required ChapterSimpleDTO Chapter { get; set; }
         public required List<WordSimpleDTO> Words { get; set; }
@@ -26,7 +22,7 @@ namespace writings_backend_dotnet.DTOs
             {
                 Number = verse.Number,
                 Text = verse.Text,
-                TextNoVowel = verse.TextNoVowel,
+                TextWithoutVowel = verse.TextWithoutVowel,
                 TextSimplified = verse.TextSimplified,
                 Chapter = verse.Chapter.ToChapterSimpleDTO(),
                 Words = verse.Words.Select(e => e.ToWordSimpleDTO()).ToList(),

@@ -1,24 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
-    public class ChapterMeaning
+    public class ChapterMeaning 
     {
-        [Key, Column("id")]
+        [Key, Column("id", TypeName = DBType32bitInteger)]
         public int Id { get; set; }
 
-        [Column("chapter_meaning", TypeName = "varchar(50)")]
+        [Column("meaning", TypeName = DBTypeVARCHAR100)]
         public required string Meaning { get; set; }
 
-        [Required]
-        public required int ChapterId { get; set; }
+        [Required, Column("chapter_id", TypeName = DBType16bitInteger)]
+        public short ChapterId { get; set; }
+        public virtual Chapter Chapter { get; set; } = null!;
 
-        public required Chapter Chapter { get; set; }
+        [Required, Column("language_id", TypeName = DBType8bitInteger)]
+        public byte LanguageId { get; set; }
 
-        [Required]
-        public required short LanguageId { get; set; }
-
-        public required Language Language { get; set; }
+        public virtual Language Language { get; set; } = null!;
     }
 }

@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     [Table("user")]
     public class User
     {
-        [Key, Column("id", TypeName = "uuid"), DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key, Column("id", TypeName = "uuid")]
         public Guid Id { get; set; }
 
         [Required, MaxLength(24)]
@@ -33,7 +34,7 @@ namespace writings_backend_dotnet.Models
         public string Password { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; }
-
+        
         public DateTime? LastActive { get; set; }
 
         public DateTime? IsFrozen { get; set; }
@@ -45,36 +46,41 @@ namespace writings_backend_dotnet.Models
         [ForeignKey("RoleId")]
         public Role? Role { get; set; }
 
-        [Column("preferred_languageId", TypeName = "smallint")]
-        public short PreferredLanguageId { get; set; } = 1;
+        [Column("preferred_languageId", TypeName = DBType8bitInteger)]
+        public byte PreferredLanguageId { get; set; } = 1;
 
         [ForeignKey("PreferredLanguageId")]
-        public Language? PreferredLanguage { get; set; }
+        public virtual Language PreferredLanguage { get; set; } = null!;
 
-        public List<Session>? Sessions { get; set; }
+        public virtual List<Session>? Sessions { get; set; }
 
-        public List<Collection>? Collections { get; set; }
+        public virtual List<Collection>? Collections { get; set; }
 
-        public List<Note>? Notes { get; set; }
+        public virtual List<Note>? Notes { get; set; }
 
-        public List<Comment>? Comments { get; set; }
+        public virtual List<Comment>? Comments { get; set; }
 
-        public List<Follow>? Followers { get; set; }
+        public virtual List<Follow>? Followers { get; set; }
 
-        public List<Follow>? Following { get; set; }
+        public virtual List<Follow>? Following { get; set; }
 
-        public List<Block>? BlockedUsers { get; set; }
+        public virtual List<FollowR>? FollowerRs { get; set; }
 
-        public List<Block>? BlockedByUsers { get; set; }
+        public virtual List<FollowR>? FollowRing { get; set; }
 
-        public List<FreezeR>? FreezeRecords { get; set; }
+        public virtual List<Block>? BlockedUsers { get; set; }
 
-        public List<Like>? Likes { get; set; }
+        public virtual List<Block>? BlockedByUsers { get; set; }
 
-        public List<Notification>? NotificationsReceived { get; set; }
+        public virtual List<FreezeR>? FreezeRecords { get; set; }
 
-        public List<Notification>? NotificationsSent { get; set; }
+        public virtual List<Like>? Likes { get; set; }
 
+        public virtual List<Notification>? NotificationsReceived { get; set; }
+
+        public virtual List<Notification>? NotificationsSent { get; set; }
+
+        public virtual List<Suggestion>? Suggestions { get; set; }
 
     }
 }

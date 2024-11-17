@@ -31,7 +31,7 @@ namespace writings_backend_dotnet.MiddleWare
                     OccurredAt = DateTime.UtcNow
                 };
 
-                dbContext.RequestLog.Add(requestLog);
+                //dbContext.RequestLog.Add(requestLog);
                 await dbContext.SaveChangesAsync();
             });
         }
