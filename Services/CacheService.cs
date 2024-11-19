@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
-using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Services
 {
@@ -14,7 +13,7 @@ namespace writings_backend_dotnet.Services
 
     public class CacheService(ApplicationDBContext db) : ICacheService
     {
-        private readonly ApplicationDBContext _db = db;
+        private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
 
         public async Task<T?> GetCachedDataAsync<T>(string key)
         {
@@ -48,7 +47,7 @@ namespace writings_backend_dotnet.Services
         }
 
 
-       public async Task SetCacheDataAsync<T>(string key, T data)
+        public async Task SetCacheDataAsync<T>(string key, T data)
         {
             string jsonData = JsonSerializer.Serialize(data);
 
@@ -71,7 +70,7 @@ namespace writings_backend_dotnet.Services
                 _db.Cache.Add(cacheEntry);
 
                 var cacheR = new CacheR
-                {   
+                {
                     Cache = cacheEntry,
                     FetchedAt = DateTime.UtcNow
                 };

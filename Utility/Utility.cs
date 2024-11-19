@@ -2,6 +2,7 @@ namespace writings_backend_dotnet.Utility
 {
     public static class Utility
     {
+
         public const string DBTypeDateTime = "datetime";
 
         public const string DBType8bitInteger = "tinyint";
@@ -11,8 +12,10 @@ namespace writings_backend_dotnet.Utility
         public const string DBType32bitInteger = "int";
 
         public const string DBType64bitInteger = "bigint";
+        
+        public const string DBTypeVARBINARYMAX = "varbinary(max)";
 
-        public const string DBTypeVARCHARMAX = "nvarchar(max)";
+        public const string DBTypeVARCHARMAX = "varchar(max)";
 
         public const string DBTypeVARCHAR500 = "VARCHAR(500)";
 
@@ -24,7 +27,9 @@ namespace writings_backend_dotnet.Utility
 
         public const string DBTypeVARCHAR50 = "VARCHAR(50)";
 
-        public const string DBTypeVARCHAR20 = "VARCHAR(20)";
+        public const string DBTypeVARCHAR32 = "VARCHAR(32)";
+
+        public const string DBTypeVARCHAR16 = "VARCHAR(16)";
 
         public const string DBTypeVARCHAR5 = "VARCHAR(5)";
 

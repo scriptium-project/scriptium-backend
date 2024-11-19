@@ -8,10 +8,12 @@ namespace writings_backend_dotnet.Models
     {
         [Key]
         public string Key { get; set; } = null!;
-    
-        [Required]
-        public string Value { get; set; } = null!; 
-    
+
+        // [Required, Column(TypeName = DBTypeVARBINARYMAX)] //TODO:Binary Data
+        // public byte[] Data { get; set; } = null!; 
+
+        public required Guid UserId { get; set; }
+
         public DateTime? ExpiresAt { get; set; }
     }
 

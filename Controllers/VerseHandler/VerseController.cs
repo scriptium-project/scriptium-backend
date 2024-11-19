@@ -11,8 +11,8 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
     [ApiController, Route("verse/")]
     public class VerseController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
     {
-        private readonly ApplicationDBContext _db = db;
-        private readonly ICacheService _cacheService = cacheService;
+        private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
+        private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
 
         [HttpGet("{ScriptureNumber}/{SectionNumber}/{ChapterNumber}/{VerseNumber}")]
         public async Task<IActionResult> GetVerse([FromRoute] VerseValidatedDTO dto)
@@ -48,7 +48,6 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
             if (verse == null) return NotFound("There is no verse matches with this information.");
 
             data = verse.ToVerseSimpleDTO();
-
 
             await _cacheService.SetCacheDataAsync(requestPath, data);
 

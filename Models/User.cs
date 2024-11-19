@@ -1,17 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     [Table("user")]
-    public class User
+    public class User : IdentityUser<Guid>
     {
-        [Key, Column("id", TypeName = "uuid")]
-        public Guid Id { get; set; }
-
-        [Required, MaxLength(24)]
-        public string Username { get; set; } = null!;
 
         [Required, MaxLength(30)]
         public string Name { get; set; } = null!;
@@ -19,32 +15,23 @@ namespace writings_backend_dotnet.Models
         [Required, MaxLength(30)]
         public string Surname { get; set; } = null!;
 
+        public byte[] Image { get; set; } = null!; //TODO: Will be implemented
+
         [MaxLength(1)]
         public string? Gender { get; set; }
 
         [MaxLength(200)]
         public string? Biography { get; set; }
 
-        [Required, MaxLength(255)]
-        public string Email { get; set; } = null!;
-
         public DateTime? EmailVerified { get; set; }
 
-        [Required, MaxLength(255)]
-        public string Password { get; set; } = null!;
-
         public DateTime CreatedAt { get; set; }
-        
+
         public DateTime? LastActive { get; set; }
 
         public DateTime? IsFrozen { get; set; }
 
         public DateTime? IsPrivate { get; set; }
-
-        public short? RoleId { get; set; }
-
-        [ForeignKey("RoleId")]
-        public Role? Role { get; set; }
 
         [Column("preferred_languageId", TypeName = DBType8bitInteger)]
         public byte PreferredLanguageId { get; set; } = 1;

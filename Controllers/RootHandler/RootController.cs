@@ -12,8 +12,8 @@ namespace writings_backend_dotnet.Controllers.RootHandler
     [ApiController, Route("root/")]
     public class RootController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
     {
-        private readonly ApplicationDBContext _db = db;
-        private readonly ICacheService _cacheService = cacheService;
+        private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
+        private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
 
 
         [HttpGet("{ScriptureNumber}/{RootLatin}")]

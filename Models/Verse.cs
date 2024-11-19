@@ -18,7 +18,7 @@ namespace writings_backend_dotnet.Models
 
         [Column("text", TypeName = DBTypeVARCHARMAX)]
         public required string TextWithoutVowel { get; set; }
-        
+
         [Column("text", TypeName = DBTypeVARCHARMAX)]
         public string TextSimplified { get; set; } = null!;
 
@@ -33,7 +33,7 @@ namespace writings_backend_dotnet.Models
 
         public virtual List<TranslationText> TranslationTexts { get; set; } = [];
 
-        public virtual List<CollectionVerse> CollectionVerses { get; set; } =[];
+        public virtual List<CollectionVerse> CollectionVerses { get; set; } = [];
 
         public virtual List<Note> Notes { get; set; } = [];
 

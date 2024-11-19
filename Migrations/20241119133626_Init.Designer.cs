@@ -12,7 +12,7 @@ using writings_backend_dotnet.DB;
 namespace writings_backend_dotnet.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20241117215610_Init")]
+    [Migration("20241119133626_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -24,6 +24,109 @@ namespace writings_backend_dotnet.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
 
             modelBuilder.Entity("writings_backend_dotnet.FreezeR", b =>
                 {
@@ -495,7 +598,7 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text");
 
                     b.HasKey("Id");
@@ -506,11 +609,8 @@ namespace writings_backend_dotnet.Migrations
             modelBuilder.Entity("writings_backend_dotnet.Models.Language", b =>
                 {
                     b.Property<byte>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint")
                         .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<byte>("Id"));
 
                     b.Property<string>("LangCode")
                         .IsRequired()
@@ -519,12 +619,12 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("LangEnglish")
                         .IsRequired()
-                        .HasColumnType("VARCHAR(20)")
+                        .HasColumnType("VARCHAR(16)")
                         .HasColumnName("lang_english");
 
                     b.Property<string>("LangOwn")
                         .IsRequired()
-                        .HasColumnType("VARCHAR(20)")
+                        .HasColumnType("VARCHAR(16)")
                         .HasColumnName("lang_own");
 
                     b.HasKey("Id");
@@ -632,7 +732,7 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -710,36 +810,30 @@ namespace writings_backend_dotnet.Migrations
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Role", b =>
                 {
-                    b.Property<short>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("smallint")
-                        .HasColumnName("id");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
-
-                    b.Property<string>("Description")
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("role_name");
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("role", (string)null);
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = (short)1,
-                            RoleName = "Admin"
-                        },
-                        new
-                        {
-                            Id = (short)2,
-                            RoleName = "Verified"
-                        });
+                    b.ToTable("role", (string)null);
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Root", b =>
@@ -761,7 +855,7 @@ namespace writings_backend_dotnet.Migrations
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("VARCHAR(5)")
-                        .HasColumnName("[own]");
+                        .HasColumnName("own");
 
                     b.Property<byte>("ScriptureId")
                         .HasColumnType("tinyint")
@@ -915,12 +1009,8 @@ namespace writings_backend_dotnet.Migrations
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Key");
 
@@ -955,7 +1045,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
@@ -1022,7 +1113,7 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text");
 
                     b.Property<short>("TranslationId")
@@ -1052,7 +1143,7 @@ namespace writings_backend_dotnet.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<short>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("description");
 
                     b.Property<byte>("LanguageId")
@@ -1066,7 +1157,7 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnName("name");
 
                     b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("url");
 
                     b.HasKey("Id");
@@ -1114,7 +1205,7 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text");
 
                     b.Property<int>("VerseId")
@@ -1139,9 +1230,16 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnName("id")
                         .HasDefaultValueSql("NEWID()");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Biography")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -1154,12 +1252,20 @@ namespace writings_backend_dotnet.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("EmailVerified")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Gender")
                         .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)");
+                        .HasColumnType("CHAR(1)")
+                        .HasColumnName("gender");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("image");
 
                     b.Property<DateTime?>("IsFrozen")
                         .HasColumnType("datetime")
@@ -1173,15 +1279,33 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("last_active");
 
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(16)
+                        .HasColumnType("VARCHAR(16)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<byte>("PreferredLanguageId")
                         .ValueGeneratedOnAdd()
@@ -1189,18 +1313,22 @@ namespace writings_backend_dotnet.Migrations
                         .HasDefaultValue((byte)1)
                         .HasColumnName("preferred_languageId");
 
-                    b.Property<short?>("RoleId")
-                        .HasColumnType("smallint");
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasMaxLength(16)
+                        .HasColumnType("VARCHAR(16)")
+                        .HasColumnName("surname");
 
-                    b.Property<string>("Username")
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(24)
-                        .HasColumnType("nvarchar(24)")
+                        .HasMaxLength(16)
+                        .HasColumnType("VARCHAR(16)")
                         .HasColumnName("username");
 
                     b.HasKey("Id");
@@ -1208,11 +1336,19 @@ namespace writings_backend_dotnet.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
+                    b.HasIndex("NormalizedEmail")
+                        .IsUnique()
+                        .HasDatabaseName("EmailIndex")
+                        .HasFilter("[NormalizedEmail] IS NOT NULL");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
                     b.HasIndex("PreferredLanguageId");
 
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("Username")
+                    b.HasIndex("UserName")
                         .IsUnique();
 
                     b.ToTable("user", (string)null);
@@ -1237,17 +1373,17 @@ namespace writings_backend_dotnet.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text");
 
                     b.Property<string>("TextSimplified")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text_simplified");
 
                     b.Property<string>("TextWithoutVowel")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("varchar(max)")
                         .HasColumnName("text_without_vowel");
 
                     b.HasKey("Id");
@@ -1337,6 +1473,57 @@ namespace writings_backend_dotnet.Migrations
                     b.HasIndex("WordId");
 
                     b.ToTable("word_meaning", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("writings_backend_dotnet.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+                {
+                    b.HasOne("writings_backend_dotnet.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.FreezeR", b =>
@@ -1704,7 +1891,9 @@ namespace writings_backend_dotnet.Migrations
                 {
                     b.HasOne("writings_backend_dotnet.Models.User", null)
                         .WithMany("Sessions")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Suggestion", b =>
@@ -1817,13 +2006,7 @@ namespace writings_backend_dotnet.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("writings_backend_dotnet.Models.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId");
-
                     b.Navigation("PreferredLanguage");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Verse", b =>
@@ -1938,11 +2121,6 @@ namespace writings_backend_dotnet.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
-                });
-
-            modelBuilder.Entity("writings_backend_dotnet.Models.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("writings_backend_dotnet.Models.Root", b =>

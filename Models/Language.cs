@@ -11,10 +11,10 @@ namespace writings_backend_dotnet.Models
         [Key, Column("id", TypeName = DBType8bitInteger)]
         public byte Id { get; set; }
 
-        [Column(TypeName = DBTypeVARCHAR20)]
+        [Column(TypeName = DBTypeVARCHAR16)]
         public required string LangEnglish { get; set; }
 
-        [Column(TypeName = DBTypeVARCHAR20)]
+        [Column(TypeName = DBTypeVARCHAR16)]
         public required string LangOwn { get; set; }
 
         [Column(TypeName = DBTypeVARCHAR2)]

@@ -26,7 +26,7 @@ namespace writings_backend_dotnet.Models
         public int VerseId { get; set; }
 
         public virtual Verse Verse { get; set; } = null!;
-        
+
         [Column("root_id", TypeName = DBType64bitInteger)]
         public int? RootId { get; set; } = null!;
 

@@ -9,7 +9,7 @@ namespace writings_backend_dotnet.Models
         [Key, Column("id", TypeName = DBType32bitInteger)]
         public int Id { get; set; }
 
-        [Required, Column("text",TypeName = DBTypeVARCHARMAX)]
+        [Required, Column("text", TypeName = DBTypeVARCHARMAX)]
         public required string Text { get; set; }
 
         [Required, Column("language_id", TypeName = DBType8bitInteger), ForeignKey("Language")]
