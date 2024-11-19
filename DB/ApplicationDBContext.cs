@@ -708,81 +708,81 @@ namespace writings_backend_dotnet.DB
                         User.HasKey(e => e.Id);
 
                         User.Property(e => e.Id)
-                            .HasColumnName("id")
-                            .HasColumnType(DBTypeUUID)
-                            .HasDefaultValueSql(DBDefaultUUIDFunction)
-                            .IsRequired(true);
+                        .HasColumnName("id")
+                        .HasColumnType(DBTypeUUID)
+                        .HasDefaultValueSql(DBDefaultUUIDFunction)
+                        .IsRequired(true);
 
                         User.Property(e => e.UserName)
-                            .HasColumnName("username")
-                            .HasColumnType(DBTypeVARCHAR16)
-                            .HasMaxLength(16)
-                            .IsRequired(true)
-                            .HasColumnName("username");
+                        .HasColumnName("username")
+                        .HasColumnType(DBTypeVARCHAR16)
+                        .HasMaxLength(16)
+                        .IsRequired(true)
+                        .HasColumnName("username");
 
                         User.Property(e => e.Name)
-                            .HasMaxLength(16).HasColumnType(DBTypeVARCHAR16)
-                            .IsRequired();
+                        .HasMaxLength(16).HasColumnType(DBTypeVARCHAR16)
+                        .IsRequired();
 
                         User.Property(e => e.Image).HasColumnName("image").HasColumnType(DBTypeVARBINARYMAX)
-                         .IsRequired(false);
+                        .IsRequired(false);
 
                         User.Property(e => e.Surname).HasColumnName("surname").HasColumnType(DBTypeVARCHAR16)
-                            .HasMaxLength(16)
-                            .IsRequired();
+                        .HasMaxLength(16)
+                        .IsRequired();
 
                         User.Property(e => e.Gender).HasColumnName("gender").HasColumnType(DBTypeCHAR1)
-                            .HasMaxLength(1)
-                            .IsRequired(false);
+                        .HasMaxLength(1)
+                        .IsRequired(false);
 
                         User.Property(e => e.Biography)
-                            .HasMaxLength(200)
-                            .IsRequired(false);
+                        .HasMaxLength(200)
+                        .IsRequired(false);
 
                         User.Property(e => e.Email)
-                            .HasMaxLength(255)
-                            .IsRequired();
+                        .HasMaxLength(255)
+                        .IsRequired();
 
                         User.Property(e => e.CreatedAt)
-                            .HasColumnName("created_at")
-                            .HasColumnType(DBTypeDateTime)
-                            .HasDefaultValueSql(DBDefaultDateTimeFunction)
-                            .IsRequired(true);
+                        .HasColumnName("created_at")
+                        .HasColumnType(DBTypeDateTime)
+                        .HasDefaultValueSql(DBDefaultDateTimeFunction)
+                        .IsRequired(true);
 
                         User.Property(e => e.LastActive)
-                            .HasColumnName("last_active")
-                            .HasColumnType(DBTypeDateTime);
+                        .HasColumnName("last_active")
+                        .HasColumnType(DBTypeDateTime);
 
                         User.Property(e => e.IsFrozen)
-                            .HasColumnName("is_frozen")
-                            .HasColumnType(DBTypeDateTime);
+                        .HasColumnName("is_frozen")
+                        .HasColumnType(DBTypeDateTime);
 
                         User.Property(e => e.IsPrivate)
-                            .HasColumnName("is_private")
-                            .HasColumnType(DBTypeDateTime);
+                        .HasColumnName("is_private")
+                        .HasColumnType(DBTypeDateTime);
 
                         User.Property(e => e.PreferredLanguageId)
-                            .HasColumnName("preferred_languageId")
-                            .HasColumnType(DBType8bitInteger)
-                            .HasDefaultValue(1)
-                            .IsRequired(true);
+                        .HasColumnName("preferred_languageId")
+                        .HasColumnType(DBType8bitInteger)
+                        .HasDefaultValue(1)
+                        .IsRequired(true);
 
                         User.HasIndex(e => e.NormalizedEmail)
-                            .IsUnique(true);
+                        .IsUnique(true);
 
                         User.HasIndex(e => e.NormalizedUserName)
-                            .IsUnique(true);
+                        .IsUnique(true);
 
                         User.HasIndex(e => e.Email)
                               .IsUnique(true);
 
                         User.HasIndex(e => e.UserName)
-                            .IsUnique(true);
+                        .IsUnique(true);
 
                         User.HasOne(e => e.PreferredLanguage)
-                            .WithMany(l => l.PreferredUsers)
-                            .HasForeignKey(e => e.PreferredLanguageId)
-                            .OnDelete(DeleteBehavior.Restrict); // TODO: ON DELETE CASCADE
+                        .WithMany(l => l.PreferredUsers)
+                        .HasForeignKey(e => e.PreferredLanguageId)
+                        .OnDelete(DeleteBehavior.Restrict); // TODO: ON DELETE CASCADE
 
                   });
 
@@ -1364,67 +1364,67 @@ namespace writings_backend_dotnet.DB
                   });
 
                   modelBuilder.Entity<CacheR>(CacheR =>
-                          {
-                                CacheR.ToTable("cache_r");
+                  {
+                        CacheR.ToTable("cache_r");
 
-                                CacheR.HasKey(e => e.Id);
+                        CacheR.HasKey(e => e.Id);
 
-                                CacheR.Property(e => e.Id)
-                              .HasColumnName("id")
-                              .HasColumnType(DBType64bitInteger)
-                              .IsRequired()
-                              .ValueGeneratedOnAdd();
+                        CacheR.Property(e => e.Id)
+                      .HasColumnName("id")
+                      .HasColumnType(DBType64bitInteger)
+                      .IsRequired()
+                      .ValueGeneratedOnAdd();
 
-                                CacheR.Property(e => e.CacheId)
-                              .HasColumnName("cache_id")
-                              .HasColumnType(DBType64bitInteger)
-                              .IsRequired();
+                        CacheR.Property(e => e.CacheId)
+                      .HasColumnName("cache_id")
+                      .HasColumnType(DBType64bitInteger)
+                      .IsRequired();
 
-                                CacheR.Property(e => e.FetchedAt)
-                              .HasColumnName("fetched_at")
-                              .HasColumnType(DBTypeDateTime)
-                              .HasDefaultValueSql(DBDefaultDateTimeFunction)
-                              .IsRequired(true);
+                        CacheR.Property(e => e.FetchedAt)
+                      .HasColumnName("fetched_at")
+                      .HasColumnType(DBTypeDateTime)
+                      .HasDefaultValueSql(DBDefaultDateTimeFunction)
+                      .IsRequired(true);
 
-                                CacheR.HasOne(e => e.Cache)
-                              .WithMany(c => c.CacheRs)
-                              .HasForeignKey(e => e.CacheId)
-                              .OnDelete(DeleteBehavior.Restrict);
+                        CacheR.HasOne(e => e.Cache)
+                      .WithMany(c => c.CacheRs)
+                      .HasForeignKey(e => e.CacheId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-                          });
+                  });
 
                   modelBuilder.Entity<Suggestion>(Suggestion =>
-                      {
-                            Suggestion.ToTable("suggestion");
+                  {
+                        Suggestion.ToTable("suggestion");
 
-                            Suggestion.HasKey(e => e.Id);
+                        Suggestion.HasKey(e => e.Id);
 
-                            Suggestion.Property(e => e.UserId).HasColumnName("user_id").HasColumnType(DBTypeUUID)
-                              .IsRequired(true);
+                        Suggestion.Property(e => e.UserId).HasColumnName("user_id").HasColumnType(DBTypeUUID)
+                          .IsRequired(true);
 
-                            Suggestion.Property(e => e.TranslationTextId)
-                              .IsRequired(true);
+                        Suggestion.Property(e => e.TranslationTextId)
+                          .IsRequired(true);
 
-                            Suggestion.Property(e => e.SuggestionText)
-                              .HasColumnName("suggestion_text").HasColumnType(DBTypeVARCHAR500)
-                              .HasMaxLength(500).IsRequired();
+                        Suggestion.Property(e => e.SuggestionText)
+                          .HasColumnName("suggestion_text").HasColumnType(DBTypeVARCHAR500)
+                          .HasMaxLength(500).IsRequired();
 
-                            Suggestion.Property(e => e.CreatedAt)
-                              .HasDefaultValueSql(DBDefaultDateTimeFunction);
+                        Suggestion.Property(e => e.CreatedAt)
+                          .HasDefaultValueSql(DBDefaultDateTimeFunction);
 
-                            Suggestion.HasIndex(e => new { e.UserId, e.TranslationTextId })
-                              .IsUnique(true);
+                        Suggestion.HasIndex(e => new { e.UserId, e.TranslationTextId })
+                          .IsUnique(true);
 
-                            Suggestion.HasOne(e => e.User)
-                              .WithMany(u => u.Suggestions)
-                              .HasForeignKey(e => e.UserId)
-                              .OnDelete(DeleteBehavior.Cascade);
+                        Suggestion.HasOne(e => e.User)
+                          .WithMany(u => u.Suggestions)
+                          .HasForeignKey(e => e.UserId)
+                          .OnDelete(DeleteBehavior.Cascade);
 
-                            Suggestion.HasOne(e => e.TranslationText)
-                              .WithMany()
-                              .HasForeignKey(e => e.TranslationTextId)
-                              .OnDelete(DeleteBehavior.Cascade);
-                      });
+                        Suggestion.HasOne(e => e.TranslationText)
+                          .WithMany()
+                          .HasForeignKey(e => e.TranslationTextId)
+                          .OnDelete(DeleteBehavior.Cascade);
+                  });
 
                   //TODO: Implement Request Log
 

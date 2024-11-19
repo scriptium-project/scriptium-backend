@@ -12,7 +12,7 @@ namespace writings_backend_dotnet.Utility
         public const string DBType32bitInteger = "int";
 
         public const string DBType64bitInteger = "bigint";
-        
+
         public const string DBTypeVARBINARYMAX = "varbinary(max)";
 
         public const string DBTypeVARCHARMAX = "varchar(max)";

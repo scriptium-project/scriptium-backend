@@ -18,6 +18,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<VerseValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<RootValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AuthValidator>();
 
+//Session Validations
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileModel>();
+builder.Services.AddValidatorsFromAssemblyContaining<ChangePasswordModel>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

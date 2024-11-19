@@ -8,20 +8,20 @@ namespace writings_backend_dotnet
 
 
     public class FreezeR
-{
-    [Key]
-    public long Id { get; set; }
+    {
+        [Key]
+        public long Id { get; set; }
 
-    [Required]
-    public FreezeStatus Status { get; set; }
+        [Required]
+        public required FreezeStatus Status { get; set; }
 
-    [Required]
-    public Guid UserId { get; set; }
+        [Required]
+        public required Guid UserId { get; set; }
 
-    [Required]
-    public DateTime ProceedAt { get; set; }
+        [Required]
+        public DateTime ProceedAt { get; set; } = DateTime.UtcNow;
 
-    [ForeignKey("UserId")]
-    public virtual User User { get; set; } = null!;
-}
+        [ForeignKey("UserId")]
+        public virtual User User { get; set; } = null!;
+    }
 }

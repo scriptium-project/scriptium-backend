@@ -120,10 +120,6 @@ namespace writings_backend_dotnet.Services
                 {
                     new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new(ClaimTypes.Name, user.UserName),
-                    new(ClaimTypes.Email, user.Name),
-                    new(ClaimTypes.Email, user.Surname),
-                    new(ClaimTypes.Email, user.Gender),
-
                 };
 
                 var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
