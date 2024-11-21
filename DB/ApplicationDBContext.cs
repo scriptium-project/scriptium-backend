@@ -59,7 +59,7 @@ namespace writings_backend_dotnet.DB
 
             public required DbSet<CommentVerse> CommentVerse { get; set; }
 
-            public required DbSet<CommentNote> CommentNotes { get; set; }
+            public required DbSet<CommentNote> CommentNote { get; set; }
 
             public required DbSet<Follow> Follow { get; set; }
 

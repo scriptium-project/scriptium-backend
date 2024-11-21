@@ -15,7 +15,7 @@ namespace writings_backend_dotnet.Models
 
         public virtual User User { get; set; } = null!;
 
-        [Required, MaxLength(500), Column("text", TypeName = DBTypeVARCHAR500)]
+        [Required, MaxLength(250), Column("text", TypeName = DBTypeVARCHAR250)]
         public string Text { get; set; } = null!;
 
         [Column("created_at", TypeName = DBTypeDateTime)]
