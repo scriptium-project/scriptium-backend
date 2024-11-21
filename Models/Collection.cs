@@ -10,7 +10,7 @@ namespace writings_backend_dotnet.Models
         public Guid Id { get; set; }
 
         [Required, Column("name", TypeName = DBTypeVARCHAR100), MaxLength(100)]
-        public string Name { get; set; } = string.Empty;
+        public required string Name { get; set; }
 
         [MaxLength(250), Column("description", TypeName = DBTypeVARCHAR250)]
         public string? Description { get; set; }
@@ -24,7 +24,6 @@ namespace writings_backend_dotnet.Models
         public DateTime CreatedAt { get; set; }
 
         public virtual List<CollectionVerse>? Verses { get; set; }
-
 
     }
 }

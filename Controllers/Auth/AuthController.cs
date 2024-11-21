@@ -32,8 +32,18 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
             var Result = await _userManager.CreateAsync(user, model.Password);
 
             if (Result.Succeeded)
-                return Ok(new { Message = "Registration successful!" });
+            {
+                Collection DefaultCollection = new() //Default collection schema. Whenever a user registered a default collection should be created. Check: ../../DB/Triggers.sql and check trigger named: trg_CreateCollectionOnUserInsert
+                {
+                    Name = "", //Default Collection Name
+                    User = user,
+                };
 
+                _db.Collection.Add(DefaultCollection);
+                await _db.SaveChangesAsync();
+
+                return Ok(new { Message = "Registration successful!" });
+            }
 
             if (Result.Errors.Any(e => e.Code == "DuplicateUserName"))
                 return BadRequest(new { Message = "Username already exists." });
