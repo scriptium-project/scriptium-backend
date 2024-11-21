@@ -1062,7 +1062,7 @@ namespace writings_backend_dotnet.DB
                             .IsRequired(true);
 
                         Follow.Property(e => e.Status)
-                            .HasColumnName("status").HasConversion<string>()
+                            .HasColumnName("status").HasConversion<int>()
                             .IsRequired(true);
 
                         Follow.Property(e => e.OccurredAt)
@@ -1105,7 +1105,7 @@ namespace writings_backend_dotnet.DB
                                .IsRequired(true);
 
                         FollowR.Property(e => e.Status)
-                               .HasColumnName("status").HasConversion<string>()
+                               .HasColumnName("status").HasConversion<int>()
                                .IsRequired(true);
 
                         FollowR.Property(e => e.OccurredAt)
@@ -1127,7 +1127,6 @@ namespace writings_backend_dotnet.DB
                                .HasForeignKey(e => e.FollowedId)
                                .OnDelete(DeleteBehavior.Restrict); //TODO: ON DELETE CASCADE
                   });
-
 
                   modelBuilder.Entity<Block>(Block =>
                   {
@@ -1154,7 +1153,9 @@ namespace writings_backend_dotnet.DB
                         .HasDefaultValueSql(DBDefaultDateTimeFunction);
 
                         Block.Property(e => e.Reason)
-                        .HasColumnName("reason").HasColumnType(DBTypeVARCHAR100);
+                        .HasColumnName("reason")
+                        .HasColumnType(DBTypeVARCHAR100)
+                        .HasMaxLength(100);
 
                         Block.HasIndex(e => new { e.BlockerId, e.BlockedId })
                         .IsUnique(true);
@@ -1183,7 +1184,7 @@ namespace writings_backend_dotnet.DB
                         ;
 
                         FreezeR.Property(e => e.Status)
-                        .HasColumnName("status").HasConversion<string>()
+                        .HasColumnName("status").HasConversion<int>()
                         .IsRequired(true);
 
                         FreezeR.Property(e => e.UserId)
@@ -1315,10 +1316,10 @@ namespace writings_backend_dotnet.DB
                         .IsRequired();
 
                         Notification.Property(e => e.NotificationType)
-                        .HasColumnName("notification_type").HasConversion<string>()
+                        .HasColumnName("notification_type").HasConversion<int>()
                         .IsRequired(true);
 
-                        Notification.Property(e => e.EntityType).HasConversion<string>()
+                        Notification.Property(e => e.EntityType).HasConversion<int>()
                         .HasColumnName("entity_type");
 
                         Notification.Property(e => e.EntityId)

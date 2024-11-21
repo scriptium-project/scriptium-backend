@@ -12,7 +12,7 @@ using writings_backend_dotnet.DB;
 namespace writings_backend_dotnet.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20241119133626_Init")]
+    [Migration("20241121163047_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -143,9 +143,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnName("proceed_at")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
                         .HasColumnName("status");
 
                     b.Property<Guid>("UserId")
@@ -498,9 +497,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnName("occurred_at")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
                         .HasColumnName("status");
 
                     b.HasKey("Id");
@@ -536,9 +534,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnName("occurred_at")
                         .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
                         .HasColumnName("status");
 
                     b.HasKey("Id");
@@ -780,8 +777,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("entity_id");
 
-                    b.Property<string>("EntityType")
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<int?>("EntityType")
+                        .HasColumnType("int")
                         .HasColumnName("entity_type");
 
                     b.Property<bool>("IsRead")
@@ -790,9 +787,8 @@ namespace writings_backend_dotnet.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_read");
 
-                    b.Property<string>("NotificationType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int")
                         .HasColumnName("notification_type");
 
                     b.Property<Guid>("RecipientId")

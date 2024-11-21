@@ -2,14 +2,14 @@ namespace writings_backend_dotnet.Models.Util
 {
     public enum LikeableEntityType
     {
-        Comment,
-        Note
+        Comment = 0,
+        Note = 1
     }
 
     public enum LikeAction
     {
-        Liked,
-        Unliked
+        Liked = 0,
+        Unliked = 1
     }
 
 }

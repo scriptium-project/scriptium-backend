@@ -8,7 +8,7 @@ using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Controllers.Session
+namespace writings_backend_dotnet.Controllers.SessionHandler
 {
     [ApiController, Route("session"), Authorize]
     public class SessionController(ApplicationDBContext db, ILogger<SessionController> logger, SignInManager<User> signInManager, UserManager<User> userManager) : ControllerBase
@@ -18,7 +18,7 @@ namespace writings_backend_dotnet.Controllers.Session
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
 
-        [HttpPost("logout")]
+        [HttpPost, Route("logout")]
         public async Task<IActionResult> Logout()
         {
             string Username = User.Identity?.Name ?? "\\unknown Username";

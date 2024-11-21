@@ -2,7 +2,7 @@ namespace writings_backend_dotnet.Models.Util
 {
     public enum FreezeStatus
     {
-        Frozen,
-        Unfrozen
+        Frozen = 0,
+        Unfrozen = 1
     }
 }

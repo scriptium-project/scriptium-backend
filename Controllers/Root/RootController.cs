@@ -9,7 +9,7 @@ using writings_backend_dotnet.Services;
 namespace writings_backend_dotnet.Controllers.RootHandler
 {
 
-    [ApiController, Route("root/")]
+    [ApiController, Route("root")]
     public class RootController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -45,7 +45,7 @@ namespace writings_backend_dotnet.Controllers.RootHandler
             {
                 data
             };
-            
+
             return Ok(result);
         }
     }

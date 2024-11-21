@@ -478,7 +478,7 @@ namespace writings_backend_dotnet.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     follower_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     followed_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false),
                     occurred_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
@@ -506,7 +506,7 @@ namespace writings_backend_dotnet.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     follower_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     followed_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false),
                     occurred_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
                 constraints: table =>
@@ -532,7 +532,7 @@ namespace writings_backend_dotnet.Migrations
                 {
                     id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false),
                     user_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     proceed_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()")
                 },
@@ -575,8 +575,8 @@ namespace writings_backend_dotnet.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     recipient_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     actor_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    notification_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    entity_type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    notification_type = table.Column<int>(type: "int", nullable: false),
+                    entity_type = table.Column<int>(type: "int", nullable: true),
                     entity_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     is_read = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)

@@ -8,20 +8,14 @@ using static writings_backend_dotnet.Controllers.Validation.AuthValidator;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Controllers
+namespace writings_backend_dotnet.Controllers.AuthHandler
 {
     [ApiController]
     [Route("auth")]
-    public class AuthController(
-        ApplicationDBContext db,
-        UserManager<User> userManager,
-                          SignInManager<User> signInManager,
-                          ILogger<AuthController> logger
-                          ) : ControllerBase
+    public class AuthController(ApplicationDBContext db, UserManager<User> userManager, SignInManager<User> signInManager) : ControllerBase
     {
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         private readonly SignInManager<User> _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
-        private readonly ILogger<AuthController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
 
         [HttpPost, Route("register")]
@@ -35,47 +29,41 @@ namespace writings_backend_dotnet.Controllers
                 Surname = model.Surname ?? null!
             };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
+            var Result = await _userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded)
-                return Ok(new { message = "Registration successful!" });
+            if (Result.Succeeded)
+                return Ok(new { Message = "Registration successful!" });
 
 
-            if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
-                return BadRequest(new { message = "Username already exists." });
+            if (Result.Errors.Any(e => e.Code == "DuplicateUserName"))
+                return BadRequest(new { Message = "Username already exists." });
 
-            if (result.Errors.Any(e => e.Code == "DuplicateEmail"))
-                return BadRequest(new { message = "Email already exists." });
+            if (Result.Errors.Any(e => e.Code == "DuplicateEmail"))
+                return BadRequest(new { Message = "Email already exists." });
 
-            return BadRequest(result.Errors);
+            return BadRequest(Result.Errors);
         }
 
 
         [HttpPost, Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            _logger.LogInformation($"Login attempt for user: {model.Username}");
 
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user == null)
-            {
-                _logger.LogWarning($"Login failed: User not found: {model.Username}");
-                return BadRequest(new { message = "Invalid Credentials!" });
-            }
+            User? UserRequested = await _userManager.FindByNameAsync(model.Username);
+            if (UserRequested == null)
+                return BadRequest(new { Message = "Invalid Credentials!" });
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, lockoutOnFailure: false);
+            var Result = await _signInManager.CheckPasswordSignInAsync(UserRequested, model.Password, lockoutOnFailure: false);
 
-            if (!result.Succeeded)
-            {
-                _logger.LogWarning($"Login failed: Incorrect password for user: {model.Username}");
-                return BadRequest(new { message = "Invalid Credentials!" });
-            }
+            if (!Result.Succeeded)
+                return BadRequest(new { Message = "Invalid Credentials!" });
 
-            if (user.IsFrozen != null)
+
+            if (UserRequested.IsFrozen != null)
             {
                 var freezeR = new FreezeR
                 {
-                    UserId = user.Id,
+                    UserId = UserRequested.Id,
                     Status = FreezeStatus.Unfrozen
                 };
 
@@ -83,11 +71,10 @@ namespace writings_backend_dotnet.Controllers
                 await _db.SaveChangesAsync();
             }
 
-            await _signInManager.SignInAsync(user, isPersistent: true);
-            await _userManager.UpdateAsync(user);
+            await _signInManager.SignInAsync(UserRequested, isPersistent: true);
+            await _userManager.UpdateAsync(UserRequested);
 
-            _logger.LogInformation($"User: {model.Username} successfully authenticated.");
-            return Ok(new { message = "Successfully logged in!" });
+            return Ok(new { Message = "Successfully logged in!" });
         }
 
 
@@ -96,9 +83,10 @@ namespace writings_backend_dotnet.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var username = User.Identity?.Name;
+
             return Ok(new
             {
-                message = "You are authenticated!",
+                Message = "You are authenticated!",
                 UserId = userId,
                 Username = username
             });

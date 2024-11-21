@@ -13,15 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.None);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.None);
 
-builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<VerseValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<RootValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<AuthValidator>();
-
-//Session Validations
-builder.Services.AddValidatorsFromAssemblyContaining<UpdateProfileModel>();
-builder.Services.AddValidatorsFromAssemblyContaining<ChangePasswordModel>();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -75,6 +66,8 @@ builder.Services.AddControllers()
     {
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
+
+builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 

@@ -8,7 +8,7 @@ using writings_backend_dotnet.Services;
 
 namespace writings_backend_dotnet.Controllers.VerseHandler
 {
-    [ApiController, Route("verse/")]
+    [ApiController, Route("verse")]
     public class VerseController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));

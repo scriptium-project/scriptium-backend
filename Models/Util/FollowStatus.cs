@@ -2,19 +2,19 @@ namespace writings_backend_dotnet.Models.Util
 {
     public enum FollowStatus
     {
-        Pending,
-        Accepted
+        Pending = 0,
+        Accepted = 1
     }
 
     public enum FollowRStatus
     {
-        AutomaticallyAccepted,
-        Accepted,
-        Pending,
-        Retrieved,
-        Rejected,
-        Unfollowed,
-        Removed
+        AutomaticallyAccepted = 0,
+        Accepted = 1,
+        Pending = 2,
+        Retrieved = 3,
+        Rejected = 4,
+        Unfollowed = 5,
+        Removed = 6
     }
 
 }
