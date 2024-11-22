@@ -1,13 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {

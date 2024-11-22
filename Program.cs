@@ -1,9 +1,7 @@
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Services;

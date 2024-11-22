@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
