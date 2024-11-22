@@ -10,7 +10,7 @@ namespace writings_backend_dotnet.Models
         [Required]
         public Guid UserId { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public virtual User User { get; set; } = null!;
 

@@ -87,7 +87,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             return Ok(new { data });
         }
 
-        [HttpPost, Route("note/create")]
+        [HttpPost, Route("create/note")]
         public async Task<IActionResult> CreateCommentOnNote([FromRoute] EntityCommentCreateModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -133,12 +133,12 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             }
             catch (Exception)
             {
-                return BadRequest(new { Message = "Something went unexpectedly wrong!" });
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
         }
 
-        [HttpPost, Route("verse/create")]
+        [HttpPost, Route("create/verse")]
         public async Task<IActionResult> CreateCommentOnVerse([FromRoute] EntityCommentCreateModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -182,7 +182,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             }
             catch (Exception)
             {
-                return BadRequest(new { Message = "Something went unexpectedly wrong!" });
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -218,7 +218,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             }
             catch (Exception)
             {
-                return BadRequest(new { Message = "Something went unexpectedly wrong!" });
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -251,7 +251,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             }
             catch (Exception)
             {
-                return BadRequest(new { Message = "Something went unexpectedly wrong!" });
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
         }

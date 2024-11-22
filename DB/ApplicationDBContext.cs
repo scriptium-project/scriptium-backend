@@ -71,7 +71,9 @@ namespace writings_backend_dotnet.DB
 
             public required DbSet<Like> Like { get; set; }
 
-            public required DbSet<LikeComment> LikeNote { get; set; }
+            public required DbSet<LikeComment> LikeComment { get; set; }
+
+            public required DbSet<LikeNote> LikeNote { get; set; }
 
             public required DbSet<Notification> Notification { get; set; }
 

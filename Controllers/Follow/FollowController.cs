@@ -42,7 +42,7 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             }
             catch
             {
-                return StatusCode(500, new { Message = "Something went wrong!" });
+                return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
         }
 
@@ -67,7 +67,7 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             }
             catch
             {
-                return BadRequest(new { Message = "Something went wrong!" });
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
         }
 
@@ -117,7 +117,7 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             }
             catch
             {
-                return BadRequest(new { Message = "Something went unexpectedly wrong!" });
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
         }
