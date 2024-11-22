@@ -7,30 +7,14 @@ using FluentValidation;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {
-    public class GetCommentsFromNoteModel
-    {
-        public required long NoteId { get; set; }
-    }
-
-    public class GetCommentsFromNoteModelValidator : AbstractValidator<GetCommentsFromNoteModel>
-    {
-        public GetCommentsFromNoteModelValidator()
-        {
-            RuleFor(r => r.NoteId).GreaterThan(0)
-            .WithMessage("Variable NoteId must be greater than 0.");
-
-
-        }
-    }
-
-    public class GetCommentsFromVerseModel
+    public class CommentIdentifierModel
     {
         public required long CommentId { get; set; }
     }
 
-    public class GetCommentsFromVerseModelValidator : AbstractValidator<GetCommentsFromVerseModel>
+    public class CommentIdentifierModelValidator : AbstractValidator<CommentIdentifierModel>
     {
-        public GetCommentsFromVerseModelValidator()
+        public CommentIdentifierModelValidator()
         {
             RuleFor(r => r.CommentId)
             .GreaterThan(0).WithMessage("Variable CommentId must be greater than 0.");

@@ -24,9 +24,17 @@ namespace writings_backend_dotnet.DTOs
                 Verse = note.Verse.ToVerseSimpleDTO(),
                 User = isFollowing ? note.User.ToUserDTO() : null,
             };
+        }
 
-
-
+        public static NoteDTO ToNoteDTO(this Note note)
+        {
+            return new NoteDTO
+            {
+                Id = note.Id,
+                NoteText = note.Text,
+                Verse = note.Verse.ToVerseSimpleDTO(),
+                User = note.User.ToUserDTO()
+            };
         }
     }
 }

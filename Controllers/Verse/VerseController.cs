@@ -15,7 +15,7 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
         private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
 
         [HttpGet("{ScriptureNumber}/{SectionNumber}/{ChapterNumber}/{VerseNumber}")]
-        public async Task<IActionResult> GetVerse([FromRoute] VerseValidatedDTO dto)
+        public async Task<IActionResult> GetVerse([FromRoute] VerseValidatedModel dto)
         {
             VerseSimpleDTO data;
 

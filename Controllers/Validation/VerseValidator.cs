@@ -3,7 +3,7 @@ using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {
-    public class VerseValidatedDTO
+    public class VerseValidatedModel
     {
         public required short ScriptureNumber { get; set; }
         public required short SectionNumber { get; set; }
@@ -11,7 +11,7 @@ namespace writings_backend_dotnet.Controllers.Validation
         public required short VerseNumber { get; set; }
     }
 
-    public class VerseValidator : AbstractValidator<VerseValidatedDTO>
+    public class VerseValidator : AbstractValidator<VerseValidatedModel>
     {
         public VerseValidator()
         {
@@ -64,7 +64,7 @@ namespace writings_backend_dotnet.Controllers.Validation
                     .WithMessage(dto => $"Verse number is too big; maximum is {GetVerseCount(dto)} in chapter {dto.ChapterNumber}.");
         }
 
-        private int GetSectionCount(VerseValidatedDTO dto)
+        private int GetSectionCount(VerseValidatedModel dto)
         {
             if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture))
                 return scripture.SectionCount;
@@ -72,7 +72,7 @@ namespace writings_backend_dotnet.Controllers.Validation
             return -1;
         }
 
-        private int GetChapterCount(VerseValidatedDTO dto)
+        private int GetChapterCount(VerseValidatedModel dto)
         {
             if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
                 scripture.Sections.TryGetValue(dto.SectionNumber, out var section))
@@ -81,7 +81,7 @@ namespace writings_backend_dotnet.Controllers.Validation
             return -1;
         }
 
-        private int GetVerseCount(VerseValidatedDTO dto)
+        private int GetVerseCount(VerseValidatedModel dto)
         {
             if (SCRIPTURE_DATA.TryGetValue(dto.ScriptureNumber, out var scripture) &&
                 scripture.Sections.TryGetValue(dto.SectionNumber, out var section) &&

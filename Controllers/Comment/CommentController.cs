@@ -12,6 +12,7 @@ using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.DTOs;
 using writings_backend_dotnet.Models;
+using writings_backend_dotnet.Models.Util;
 
 namespace writings_backend_dotnet.Controllers.CommentHandler
 {
@@ -37,7 +38,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
                 return NotFound(new { Message = "User not found." });
 
             HashSet<Guid> FollowedUserIds = _db.Follow
-              .Where(f => f.FollowerId == UserRequested.Id)
+              .Where(f => f.FollowerId == UserRequested.Id && f.Status == FollowStatus.Accepted)
               .Select(f => f.FollowedId)
               .ToHashSet();
 
@@ -50,7 +51,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
         }
 
         [HttpGet, Route("note/{NoteId}")]
-        public async Task<IActionResult> GetCommentFromNote([FromRoute] GetCommentsFromNoteModel model)
+        public async Task<IActionResult> GetCommentFromNote([FromRoute] NoteIdentifierModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -69,7 +70,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
         }
 
         [HttpGet, Route("verse/{VerseId}")]
-        public async Task<IActionResult> GetCommentFromVerse([FromRoute] GetCommentsFromVerseModel model)
+        public async Task<IActionResult> GetCommentFromVerse([FromRoute] VerseValidatedModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

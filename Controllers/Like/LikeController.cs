@@ -10,7 +10,7 @@ using writings_backend_dotnet.Models.Util;
 
 namespace writings_backend_dotnet.Controllers.LikeHandler
 {
-    [ApiController, Route("follow"), Authorize]
+    [ApiController, Route("like"), Authorize]
     public class LikeController(ApplicationDBContext db, UserManager<User> userManager) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -18,7 +18,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
 
 
         [HttpPost, Route("like/note")]
-        public async Task<IActionResult> LikeNote([FromBody] LikeNoteModel model)
+        public async Task<IActionResult> LikeNote([FromBody] NoteIdentifierModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -70,14 +70,14 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
         }
 
         [HttpPost, Route("like/comment")]
-        public IActionResult LikeComment([FromBody] LikeCommentModel model)
+        public IActionResult LikeComment([FromBody] CommentIdentifierModel model)
         {
             //TODO: Will be implemented.
             return Ok();
         }
 
         [HttpDelete, Route("unlike/note")]
-        public async Task<IActionResult> UnlikeNote([FromBody] LikeNoteModel model)
+        public async Task<IActionResult> UnlikeNote([FromBody] NoteIdentifierModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -112,7 +112,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
         }
 
         [HttpDelete, Route("unlike/comment")]
-        public async Task<IActionResult> UnlikeVerse([FromBody] LikeCommentModel model)
+        public async Task<IActionResult> UnlikeVerse([FromBody] CommentIdentifierModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
