@@ -124,7 +124,7 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
             if (VerseRemoved == null)
                 return NotFound(new { Message = "Verse not found." });
 
-
+            //This lists will indicate users which insertion has been succeed or failed.
             List<CollectionProcessResultDTO> succeed = [];
             List<CollectionProcessResultDTO> failed = [];
 
