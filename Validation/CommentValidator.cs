@@ -6,7 +6,7 @@ namespace writings_backend_dotnet.Controllers.Validation
     public class CommentLikeProcessModel
     {
         public required long CommentId { get; set; }
-        public required LikeableEntityType EntityType { get; set; }
+        public required long EntityId { get; set; }
     }
 
     public class CommentLikeProcessModelValidator : AbstractValidator<CommentLikeProcessModel>
@@ -14,6 +14,9 @@ namespace writings_backend_dotnet.Controllers.Validation
         public CommentLikeProcessModelValidator()
         {
             RuleFor(r => r.CommentId)
+            .GreaterThan(0).WithMessage("Variable CommentId must be greater than 0.");
+
+            RuleFor(r => r.EntityId)
             .GreaterThan(0).WithMessage("Variable CommentId must be greater than 0.");
         }
     }

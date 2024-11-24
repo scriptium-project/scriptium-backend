@@ -17,7 +17,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
 
 
-        [HttpPost, Route("like/note")]
+        [HttpPost, Route("note")]
         public async Task<IActionResult> LikeNote([FromBody] NoteIdentifierModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -69,12 +69,120 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
 
         }
 
-        [HttpPost, Route("like/comment")]
-        public IActionResult LikeComment([FromBody] CommentLikeProcessModel model)
+        [HttpPost, Route("comment/note")]
+        public async Task<IActionResult> LikeCommentOnNote([FromBody] CommentLikeProcessModel model)
         {
-            //TODO: Will be implemented.
-            return Ok();
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (UserId == null)
+                return Unauthorized();
+
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
+                return NotFound(new { Message = "User not found." });
+
+
+            Note? NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.EntityId);
+
+            if (NoteTarget == null)
+                return NotFound(new { Message = "Note not found." });
+
+            Comment? CommentLiked = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.CommentNote != null && c.CommentNote.NoteId == NoteTarget.Id);
+
+            if (CommentLiked == null)
+                return NotFound(new { Message = "Comment not found." });
+
+
+            HashSet<long> LikeableNoteCommentIds = _db.GetAvailableNoteCommentIds(UserRequested.Id, NoteTarget.Id);
+
+            bool isFollowing = await _db.Follow.AnyAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == NoteTarget.UserId && f.Status == FollowStatus.Accepted);
+
+            if (!(isFollowing && LikeableNoteCommentIds.Contains(CommentLiked.Id)))
+                return Unauthorized(new { Message = "You do not have permission to attach comment to this note" });
+
+            Like LikeCreated = new()
+            {
+                UserId = UserRequested.Id,
+            };
+
+            LikeNote LikeNoteCreated = new()
+            {
+                NoteId = NoteTarget.Id,
+                LikeId = LikeCreated.Id,
+            };
+            _db.Like.Add(LikeCreated);
+            _db.LikeNote.Add(LikeNoteCreated);
+            try
+            {
+                await _db.SaveChangesAsync();
+
+                return Ok(new { Message = "You have successfully liked the comment on this specified note!" });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+
+            }
+
         }
+
+        [HttpPost, Route("comment/verse")]
+        public async Task<IActionResult> LikeCommentVerse([FromBody] CommentLikeProcessModel model)
+        {
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (UserId == null)
+                return Unauthorized();
+
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
+                return NotFound(new { Message = "User not found." });
+
+            Verse? VerseTarget = await _db.Verse.FirstOrDefaultAsync(n => n.Id == model.EntityId);
+
+            if (VerseTarget == null)
+                return NotFound(new { Message = "Verse not found." });
+
+            Comment? CommentLiked = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.CommentVerse != null && c.CommentVerse.VerseId == VerseTarget.Id);
+
+            if (CommentLiked == null)
+                return NotFound(new { Message = "Comment not found." });
+
+            HashSet<long> LikeableVerseCommentIds = _db.GetAvailableVerseCommentIds(UserRequested.Id, VerseTarget.Id);
+
+            if (!LikeableVerseCommentIds.Contains(CommentLiked.Id))
+                return Unauthorized(new { Message = "You do not have permission to attach comment to this note" });
+
+            Like LikeCreated = new()
+            {
+                UserId = UserRequested.Id,
+            };
+
+            LikeComment LikeCommentCreated = new()
+            {
+                CommentId = CommentLiked.Id,
+                LikeId = LikeCreated.Id,
+            };
+
+            _db.Like.Add(LikeCreated);
+            _db.LikeComment.Add(LikeCommentCreated);
+
+            try
+            {
+                await _db.SaveChangesAsync();
+
+                return Ok(new { Message = "You have successfully liked the comment!" });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+
+            }
+
+        }
+
 
         [HttpDelete, Route("unlike/note")]
         public async Task<IActionResult> UnlikeNote([FromBody] NoteIdentifierModel model)
