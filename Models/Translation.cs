@@ -1,15 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     public class Translation
     {
-        [Key, Column("id", TypeName = DBType16bitInteger)]
+        [Key, Column("id", TypeName = Utility.DBType16bitInteger)]
         public short Id { get; set; }
 
-        [Required, Column("name", TypeName = DBTypeVARCHAR250), MaxLength(300)]
+        [Required, Column("name", TypeName = Utility.DBTypeVARCHAR250), MaxLength(300)]
         public required string Name { get; set; }
 
         [Column("production_year")]
@@ -18,10 +17,10 @@ namespace writings_backend_dotnet.Models
         [Column("added_at")]
         public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 
-        [Column("eager_from", TypeName = DBTypeDateTime)]
+        [Column("eager_from", TypeName = Utility.DBTypeDateTime)]
         public DateTime? EagerFrom { get; set; }
 
-        [Required, ForeignKey("Language"), Column("language_id", TypeName = DBType8bitInteger)]
+        [Required, ForeignKey("Language"), Column("language_id", TypeName = Utility.DBType8bitInteger)]
         public byte LanguageId { get; set; } = 1;
 
         public virtual Language Language { get; set; } = null!;

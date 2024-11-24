@@ -14,7 +14,7 @@ namespace writings_backend_dotnet.DTOs
         {
             return new UserDTO
             {
-                Username = user.UserName,
+                Username = user.UserName ?? "\\Unknown",
                 Image = user.Image
             };
 

@@ -107,6 +107,7 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             {
                 Text = model.NoteText,
                 UserId = UserRequested.Id,
+                VerseId = VerseAttached.Id
             };
 
             _db.Note.Add(NoteCreated);

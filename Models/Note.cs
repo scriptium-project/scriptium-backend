@@ -1,16 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     [Table("note")]
     public class Note
     {
-        [Key, Column("id", TypeName = DBType64bitInteger)]
+        [Key, Column("id", TypeName = Utility.DBType64bitInteger)]
         public long Id { get; set; }
 
-        [Required, Column("user_id", TypeName = DBTypeUUID), ForeignKey("User")]
+        [Required, Column("user_id", TypeName = Utility.DBTypeUUID), ForeignKey("User")]
         public Guid UserId { get; set; }
 
         public virtual User User { get; set; } = null!;
@@ -18,15 +17,15 @@ namespace writings_backend_dotnet.Models
         [Required, Column("text", TypeName = "text")]
         public string Text { get; set; } = null!;
 
-        [Required, Column("verse_id", TypeName = DBType32bitInteger), ForeignKey("Verse")]
+        [Required, Column("verse_id", TypeName = Utility.DBType32bitInteger), ForeignKey("Verse")]
         public int VerseId { get; set; }
 
         public virtual Verse Verse { get; set; } = null!;
 
-        [Column("created_at", TypeName = DBTypeDateTime)]
+        [Column("created_at", TypeName = Utility.DBTypeDateTime)]
         public DateTime CreatedAt { get; set; }
 
-        [Column("updated_at", TypeName = DBTypeDateTime)]
+        [Column("updated_at", TypeName = Utility.DBTypeDateTime)]
         public DateTime? UpdatedAt { get; set; }
 
         public virtual List<CommentNote>? Comments { get; set; }

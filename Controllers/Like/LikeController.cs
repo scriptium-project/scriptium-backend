@@ -70,7 +70,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
         }
 
         [HttpPost, Route("like/comment")]
-        public IActionResult LikeComment([FromBody] CommentIdentifierModel model)
+        public IActionResult LikeComment([FromBody] CommentLikeProcessModel model)
         {
             //TODO: Will be implemented.
             return Ok();
@@ -112,7 +112,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
         }
 
         [HttpDelete, Route("unlike/comment")]
-        public async Task<IActionResult> UnlikeVerse([FromBody] CommentIdentifierModel model)
+        public async Task<IActionResult> UnlikeVerse([FromBody] CommentLikeProcessModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 

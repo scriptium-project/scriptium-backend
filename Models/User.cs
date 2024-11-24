@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
-using static writings_backend_dotnet.Utility.Utility;
+
 
 namespace writings_backend_dotnet.Models
 {
@@ -33,7 +33,7 @@ namespace writings_backend_dotnet.Models
 
         public DateTime? IsPrivate { get; set; }
 
-        [Column("preferred_languageId", TypeName = DBType8bitInteger)]
+        [Column("preferred_languageId", TypeName = Utility.DBType8bitInteger)]
         public byte PreferredLanguageId { get; set; } = 1;
 
         [ForeignKey("PreferredLanguageId")]
@@ -41,15 +41,34 @@ namespace writings_backend_dotnet.Models
 
         public virtual List<Session>? Sessions { get; set; }
 
+        [NotMapped]
+        public int SessionCount => Sessions?.Count ?? 0;
+
         public virtual List<Collection>? Collections { get; set; }
+
+        [NotMapped]
+        public int CollectionCount => Collections?.Count ?? 0;
 
         public virtual List<Note>? Notes { get; set; }
 
+        [NotMapped]
+        public int NoteCount => Notes?.Count ?? 0;
+
         public virtual List<Comment>? Comments { get; set; }
+
+        [NotMapped]
+        public int CommentCount => Comments?.Count ?? 0;
 
         public virtual List<Follow>? Followers { get; set; }
 
-        public virtual List<Follow>? Following { get; set; }
+
+        [NotMapped]
+        public int FollowerCount => Followers?.Count ?? 0;
+
+        public virtual List<Follow>? Followings { get; set; }
+
+        [NotMapped]
+        public int FollowingCount => Followings?.Count ?? 0;
 
         public virtual List<FollowR>? FollowerRs { get; set; }
 
@@ -63,11 +82,17 @@ namespace writings_backend_dotnet.Models
 
         public virtual List<Like>? Likes { get; set; }
 
+        [NotMapped]
+        public int LikeCount => Likes?.Count ?? 0;
+
         public virtual List<Notification>? NotificationsReceived { get; set; }
 
         public virtual List<Notification>? NotificationsSent { get; set; }
 
         public virtual List<Suggestion>? Suggestions { get; set; }
+
+        [NotMapped]
+        public int SuggestionCount => Suggestions?.Count ?? 0;
 
     }
 }

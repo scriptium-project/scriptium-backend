@@ -71,7 +71,7 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
 
         }
 
-        [HttpPost, Route("update")]
+        [HttpPut, Route("update")]
         public async Task<IActionResult> UpdateCollection([FromBody] CollectionUpdateModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -107,7 +107,7 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
 
         }
 
-        [HttpPost, Route("delete")]
+        [HttpDelete, Route("delete")]
         public async Task<IActionResult> DeleteCollection([FromBody] CollectionDeleteModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);

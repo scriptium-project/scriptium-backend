@@ -4,12 +4,15 @@
     "datetime",
     "Deutsch",
     "GETUTCDATE",
+    "ISNULL",
     "NEWID",
     "Newtonsoft",
     "Npgsql",
     "NVARCHAR",
+    "Replyable",
     "tinyint",
     "uniqueidentifier",
+    "VARBINARYMAX",
     "varbinary",
     "VARCHARMAX"
   ]

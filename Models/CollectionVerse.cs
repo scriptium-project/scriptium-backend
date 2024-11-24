@@ -1,16 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     [Table("collection_verse")]
     public class CollectionVerse
     {
-        [Key, Column("id", TypeName = DBType64bitInteger)]
+        [Key, Column("id", TypeName = Utility.DBType64bitInteger)]
         public long Id { get; set; }
 
-        [Required, ForeignKey("Collection"), Column("collection_id", TypeName = DBTypeUUID)]
+        [Required, ForeignKey("Collection"), Column("collection_id", TypeName = Utility.DBTypeUUID)]
         public Guid CollectionId { get; set; }
 
         public virtual Collection Collection { get; set; } = null!;
@@ -20,10 +19,10 @@ namespace writings_backend_dotnet.Models
 
         public virtual Verse Verse { get; set; } = null!;
 
-        [Column("saved_at", TypeName = DBTypeDateTime)]
+        [Column("saved_at", TypeName = Utility.DBTypeDateTime)]
         public DateTime SavedAt { get; set; } = DateTime.UtcNow;
 
-        [MaxLength(250), Column("note", TypeName = DBTypeVARCHAR250)]
+        [MaxLength(250), Column("note", TypeName = Utility.DBTypeVARCHAR250)]
         public string? Note { get; set; }
     }
 }

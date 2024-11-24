@@ -10,14 +10,56 @@ using writings_backend_dotnet.Models.Util;
 
 namespace writings_backend_dotnet.Controllers.AuthHandler
 {
-    [ApiController]
-    [Route("auth")]
+
+    /// <summary>
+    /// This controller consists of Auth operations. Inspect the following:
+    /// </summary>
+    /// <remarks>
+    /// <list type="bullet">
+    ///     <item> 
+    ///         <term>URL: "register"</term>
+    ///         
+    ///         <c>Register([FromBody] RegisterModel model)</c>
+    ///         
+    ///         <description>This function operates necessary processes to register a user as well as mandatory cookie operations: Inspect <see cref="Services.SessionStore"/> </description>
+    ///     </item>
+    ///     
+    ///     <item> 
+    ///         <term>URL: "login"</term>
+    ///         
+    ///         <c>Login([FromBody] LoginModel model)</c>
+    ///         
+    ///         <description>Operates necessary processes to login and cookie operations. Inspect <see cref="Services.SessionStore"/> . </description>
+    ///     </item>
+    ///     
+    ///     <item> 
+    ///         <term>URL: "protected"</term>
+    ///         
+    ///         <c>ProtectedEndpoint()</c>
+    ///         
+    ///         <description>Test function for authorization.</description>
+    ///     </item>
+    /// </list>
+    /// </remarks>
+    [ApiController, Route("auth")]
     public class AuthController(ApplicationDBContext db, UserManager<User> userManager, SignInManager<User> signInManager) : ControllerBase
     {
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         private readonly SignInManager<User> _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
 
+
+        /// <summary>
+        /// Register operation and necessary cookie processes. For validation model: <see cref="RegisterModel"/>
+        /// </summary>
+        /// <param name="model">Necessary model for registration.</param>
+        /// <remarks> 
+        /// By default, users should have a collection named empty string, "", this process includes this operation also.
+        /// </remarks>
+        /// <returns>
+        /// - 200 OK if the conditions met and registration operations is successfully completed.
+        /// - 400 Bad Request if the conditions did NOT meet. Returns the reasons.
+        /// </returns>
         [HttpPost, Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
@@ -54,12 +96,23 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
             return BadRequest(Result.Errors);
         }
 
-
+        /// <summary>
+        /// Login operation and necessary cookie processes. For validation model: <see cref="LoginModel"/>
+        /// </summary>
+        /// <param name="model">Necessary model for login operations.</param>
+        /// <remarks> 
+        /// This process includes "melting" the account if account is "frozen". 11.
+        /// </remarks>
+        /// <returns>
+        /// - 200 OK if the conditions met and login operations is successfully completed.
+        /// - 400 Bad Request if credentials does not match.
+        /// </returns>
         [HttpPost, Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
 
             User? UserRequested = await _userManager.FindByNameAsync(model.Username);
+
             if (UserRequested == null)
                 return BadRequest(new { Message = "Invalid Credentials!" });
 
@@ -87,8 +140,10 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
             return Ok(new { Message = "Successfully logged in!" });
         }
 
-
-        [HttpGet("protected"), Authorize] //This handler is just for test!
+        /// <summary>
+        /// Test handler for authentication.
+        /// </summary>
+        [HttpGet("protected"), Authorize]
         public IActionResult ProtectedEndpoint()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

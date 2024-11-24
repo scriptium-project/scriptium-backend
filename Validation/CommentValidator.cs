@@ -1,15 +1,17 @@
 using FluentValidation;
+using writings_backend_dotnet.Models.Util;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {
-    public class CommentIdentifierModel
+    public class CommentLikeProcessModel
     {
         public required long CommentId { get; set; }
+        public required LikeableEntityType EntityType { get; set; }
     }
 
-    public class CommentIdentifierModelValidator : AbstractValidator<CommentIdentifierModel>
+    public class CommentLikeProcessModelValidator : AbstractValidator<CommentLikeProcessModel>
     {
-        public CommentIdentifierModelValidator()
+        public CommentLikeProcessModelValidator()
         {
             RuleFor(r => r.CommentId)
             .GreaterThan(0).WithMessage("Variable CommentId must be greater than 0.");
@@ -20,14 +22,14 @@ namespace writings_backend_dotnet.Controllers.Validation
     {
         public required long EntityId { get; set; }
         public required string CommentText { get; set; }
-        public required long ParentCommentId { get; set; }
+        public required long? ParentCommentId { get; set; }
     }
 
     public class EntityCommentCreateModelValidator : AbstractValidator<EntityCommentCreateModel>
     {
         public EntityCommentCreateModelValidator()
         {
-            RuleFor(r => r.EntityId)
+            RuleFor(r => r.EntityId).NotEmpty()
             .GreaterThan(0).WithMessage("Variable EntityId must be greater than 0.");
 
             RuleFor(r => r.CommentText)

@@ -1,28 +1,24 @@
-
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
-using static writings_backend_dotnet.Utility.Utility;
 
 namespace writings_backend_dotnet.Models
 {
     public class ScriptureMeaning
     {
-        [Key, Column("id", TypeName = DBType16bitInteger)]
+        [Key, Column("id", TypeName = Utility.DBType16bitInteger)]
         public required int Id { get; set; }
 
-        [Required, Column("meaning",TypeName = DBTypeVARCHAR50)]
+        [Required, Column("meaning", TypeName = Utility.DBTypeVARCHAR50)]
         public required string Meaning { get; set; }
 
-        [Required, Column("scripture_id", TypeName = DBType8bitInteger)]
+        [Required, Column("scripture_id", TypeName = Utility.DBType8bitInteger)]
         public byte ScriptureId { get; set; }
-        public virtual Scripture Scripture { get; set; }  = null!;
+        public virtual Scripture Scripture { get; set; } = null!;
 
-        [Required, Column("language_id", TypeName = DBType8bitInteger)]
+        [Required, Column("language_id", TypeName = Utility.DBType8bitInteger)]
         public byte LanguageId { get; set; }
-        public virtual Language Language { get; set; }  = null!;
+        public virtual Language Language { get; set; } = null!;
 
     }
 }
