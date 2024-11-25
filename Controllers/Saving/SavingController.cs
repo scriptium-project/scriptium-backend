@@ -10,13 +10,13 @@ using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.Controllers.SavingHandler
 {
-
     [ApiController, Route("saving"), Authorize]
-    public class SavingController(ApplicationDBContext db, UserManager<User> userManager) : ControllerBase
+    public class SavingController(ApplicationDBContext db, UserManager<User> userManager, ILogger<SavingController> logger) : ControllerBase
     {
-
+        //TODO: Amend
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        private readonly ILogger<SavingController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 
         [HttpPost, Route("save")]
@@ -54,6 +54,8 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
                 {
                     DTO = Collection.GetCollectionProcessResultDTO(CollectionName);
                     failed.Add(DTO);
+
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to save something on Claimed Collection: [CollectionName: {CollectionName}] Claimed Collection not found.");
                     continue;
                 }
 
@@ -64,9 +66,9 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
                     DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.AlreadyDone);
 
                     succeed.Add(DTO);
+                    _logger.LogWarning($"Conflict occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to save something on Collection: [Id: {Collection.Id}]. Collection has already this item.");
                     continue;
                 }
-
 
                 //All non-succeed conditions were passed. So we are ready to make process.
 
@@ -81,14 +83,15 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
                 try
                 {
                     await _db.SaveChangesAsync();
-
+                    _logger.LogInformation($"Operation phase completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has added Verse: [Id: {VerseAttached.Id}] to Collection: [Id: {Collection.Id}]");
                     DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.Succeed);
 
                     succeed.Add(DTO);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.Error);
+                    _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to add Verse: [Id: {VerseAttached.Id}] to Collection: [Id: {Collection.Id}]. Error Details: {ex}");
 
                     failed.Add(DTO);
                     _db.Entry(collectionVerse).State = EntityState.Detached;
@@ -131,6 +134,7 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
 
             foreach (string CollectionName in model.CollectionNames)
             {
+
                 // Check if the collection exists for the user
                 var Collection = await _db.Collection
                     .FirstOrDefaultAsync(c => c.Name == CollectionName && c.UserId == UserRequested.Id);
@@ -140,35 +144,43 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
                     DTO = Collection.GetCollectionProcessResultDTO(CollectionName);
 
                     failed.Add(DTO);
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to UNsave something on Claimed Collection: [CollectionName: {CollectionName}] Claimed Collection not found.");
+
                     continue;
                 }
-
-                // Check if the verse exists in the collection
-                CollectionVerse? CollectionVerse = await _db.CollectionVerse
-                    .FirstOrDefaultAsync(cv => cv.CollectionId == Collection.Id && cv.VerseId == VerseRemoved.Id);
-
-                if (CollectionVerse == null)
-                {
-                    DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.NotFound);
-
-                    failed.Add(DTO);
-                    continue;
-                }
-
-                //All non-succeed conditions were passed. So we are ready to make process.
-
                 try
                 {
+                    // Check if the verse exists in the collection
+                    CollectionVerse? CollectionVerse = await _db.CollectionVerse
+                        .FirstOrDefaultAsync(cv => cv.CollectionId == Collection.Id && cv.VerseId == VerseRemoved.Id);
+
+                    if (CollectionVerse == null)
+                    {
+                        DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.NotFound);
+
+                        failed.Add(DTO);
+                        _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to unsave something on Collection: [Id: {Collection.Id}]. Collection has already NOT this item.");
+
+                        continue;
+                    }
+
+                    //All non-succeed conditions were passed. So we are ready to make process.
+
+
                     _db.CollectionVerse.Remove(CollectionVerse);
+
                     await _db.SaveChangesAsync();
+
+                    _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has removed Verse: [Id: {VerseRemoved.Id}] to Collection: [Id: {Collection.Id}]");
 
                     DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.Succeed);
                     succeed.Add(DTO);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.Error);
+                    _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to remove Verse: [Id: {VerseRemoved.Id}] from Collection: [Id: {Collection.Id}]. Error Details: {ex}");
 
+                    DTO = Collection.GetCollectionProcessResultDTO(CollectionStatus.Error);
                     failed.Add(DTO);
                 }
             }

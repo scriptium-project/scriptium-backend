@@ -10,6 +10,7 @@
     "Npgsql",
     "NVARCHAR",
     "Replyable",
+    "Serilog",
     "tinyint",
     "uniqueidentifier",
     "VARBINARYMAX",

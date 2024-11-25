@@ -21,13 +21,21 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
         [HttpPost, Route("logout")]
         public async Task<IActionResult> Logout()
         {
-            string Username = User.Identity?.Name ?? "\\unknown Username";
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            _logger.LogInformation($"User {Username} has logged out.");
+            if (UserId == null)
+                return Unauthorized(new { message = "You are not logged in!" });
+
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
+                return NotFound(new { message = "Something went wrong!" });
+
+            _logger.LogInformation($"User {UserRequested.UserName} has tried to log out.");
 
             await _signInManager.SignOutAsync();
 
-            _logger.LogInformation($"User with username {Username} successfully logged out.");
+            _logger.LogInformation($"User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] successfully logged out.");
 
             return Ok(new { message = "Successfully logged out" });
         }
@@ -35,69 +43,108 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
         [HttpPost, Route("alter")]
         public async Task<IActionResult> Alter()
         {
-            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null)
+            if (UserId == null)
                 return Unauthorized(new { message = "You are not logged in!" });
 
-            User? user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
                 return NotFound(new { message = "Something went wrong!" });
 
-            bool IsPrivate = user.IsPrivate.HasValue;
+            bool IsPrivate = UserRequested.IsPrivate.HasValue;
 
-            user.IsPrivate = IsPrivate ? null : DateTime.UtcNow;
+            UserRequested.IsPrivate = IsPrivate ? null : DateTime.UtcNow;
+            try
+            {
+                string AccountStatus = IsPrivate ? "public" : "private";
 
-            await _userManager.UpdateAsync(user);
+                await _userManager.UpdateAsync(UserRequested);
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id} Username: {UserRequested.UserName}] has changed his account to {AccountStatus}");
+                return Ok(new { message = $"You account is now {AccountStatus}!" });
 
-            string message = $"You account is now {(IsPrivate ? "public" : "private")}!";
-
-            return Ok(new { message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id} Username: {UserRequested.UserName}] alter his account. Error Detail: {ex}");
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+            }
         }
 
         [HttpPost, Route("freeze")]
         public async Task<IActionResult> Freeze()
         {
-            FreezeR? freezeRecord;
+            FreezeR? FreezeRecord;
 
             string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (userId == null)
                 return Unauthorized(new { message = "You are not logged in!" });
 
-            User? user = await _userManager.FindByIdAsync(userId);
+            User? UserRequested = await _userManager.FindByIdAsync(userId);
 
-            if (user == null)
+            if (UserRequested == null)
                 return NotFound(new { message = "Something went wrong!" });
-
-            freezeRecord = await _db.FreezeR.OrderByDescending(r => r.ProceedAt)
-                                            .FirstOrDefaultAsync(r => r.UserId.ToString() == userId && r.Status == FreezeStatus.Frozen && r.ProceedAt < DateTime.UtcNow.AddDays(7));
-
-            if (freezeRecord != null)
-                return Unauthorized(new { message = "You cannot freeze your account twice within 7 days!" });
-
-            freezeRecord = new FreezeR
+            try
             {
-                UserId = user.Id,
-                Status = FreezeStatus.Frozen,
-                ProceedAt = DateTime.UtcNow,
-            };
+                FreezeRecord = await _db.FreezeR.OrderByDescending(r => r.ProceedAt)
+                                                .FirstOrDefaultAsync(r => r.UserId.ToString() == userId && r.Status == FreezeStatus.Frozen && r.ProceedAt < DateTime.UtcNow.AddDays(7));
 
-            user.IsFrozen = DateTime.UtcNow;
+                if (FreezeRecord != null)
+                {
+                    _logger.LogWarning($"Conflict occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to freeze his account twice within 7 days.");
+                    return Unauthorized(new { message = "You cannot freeze your account twice within 7 days!" });
+                }
 
-            _db.FreezeR.Add(freezeRecord);
-            await _db.SaveChangesAsync();
+                FreezeRecord = new FreezeR
+                {
+                    UserId = UserRequested.Id,
+                    Status = FreezeStatus.Frozen,
+                    ProceedAt = DateTime.UtcNow,
+                };
 
-            await _userManager.UpdateAsync(user);
-            await _signInManager.SignOutAsync();
+                UserRequested.IsFrozen = DateTime.UtcNow;
 
-            string message = "Your account has been successfully frozen!";
-            return Ok(new { message });
+                _db.FreezeR.Add(FreezeRecord);
+
+                List<Session> ActiveSessions = await _db.Session.Where(s => s.UserId == UserRequested.Id).ToListAsync();
+
+                foreach (Session session in ActiveSessions)
+                    _db.Session.Remove(session);
+
+                await _db.SaveChangesAsync();
+
+                await _userManager.UpdateAsync(UserRequested);
+                await _signInManager.SignOutAsync();
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has frozen his account.");
+                return Ok(new { message = "Your account has been successfully frozen!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to freeze his account. Error Details: {ex}");
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+            }
+
+
         }
 
         [HttpPut, Route("update")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
         {
+
+
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+                return Unauthorized(new { message = "You are not logged in!" });
+
+            User? UserRequested = await _userManager.FindByIdAsync(userId);
+
+            if (UserRequested == null)
+                return NotFound(new { message = "UserRequested not found!" });
+
+            string UpdateLogRow = "";
 
             if (!string.IsNullOrWhiteSpace(model.Username))
             {
@@ -105,50 +152,66 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
 
                 if (existingUser != null)
                     return BadRequest(new { message = "Username is already taken!" });
-
             }
 
             if (model.LanguageId.HasValue)
             {
-                var languageExists = await _db.Language
+                bool languageExists = await _db.Language
                     .AnyAsync(l => l.Id == model.LanguageId);
 
                 if (!languageExists)
                     return BadRequest(new { message = "Invalid language ID!" });
-
             }
 
-            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-                return Unauthorized(new { message = "You are not logged in!" });
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return NotFound(new { message = "User not found!" });
-
             if (!string.IsNullOrWhiteSpace(model.Name))
-                user.Name = model.Name.Trim();
+            {
+                UpdateLogRow += $" Name: {UserRequested.Name} -> {model.Name.Trim()}";
+                UserRequested.Name = model.Name.Trim();
+            }
 
             if (!string.IsNullOrWhiteSpace(model.Surname))
-                user.Surname = model.Surname.Trim();
+            {
+                UpdateLogRow += $" Surname: {UserRequested.Surname} -> {model.Surname.Trim()}";
+                UserRequested.Surname = model.Surname.Trim();
+            }
 
             if (!string.IsNullOrWhiteSpace(model.Username))
-                user.UserName = model.Username.Trim();
+            {
+                UpdateLogRow += $" UserName: {UserRequested.UserName} -> {model.Username.Trim()}";
+                UserRequested.UserName = model.Username.Trim();
+            }
 
             if (!string.IsNullOrWhiteSpace(model.Biography))
-                user.Biography = model.Biography.Trim();
+            {
+                UpdateLogRow += $" Biography: {UserRequested.Biography} -> {model.Biography.Trim()}";
+                UserRequested.Biography = model.Biography.Trim();
+            }
 
             if (!string.IsNullOrWhiteSpace(model.Gender))
-                user.Gender = model.Gender.Trim();
+            {
+                UpdateLogRow += $" Gender: {UserRequested.Gender} -> {model.Gender.Trim()}";
+                UserRequested.Gender = model.Gender.Trim();
+            }
 
             if (model.LanguageId.HasValue)
-                user.PreferredLanguageId = model.LanguageId.Value;
+            {
+                UpdateLogRow += $" Preferred LanguageId: {UserRequested.PreferredLanguageId} -> {model.LanguageId.Value}";
+                UserRequested.PreferredLanguageId = model.LanguageId.Value;
+            }
 
-            var updateResult = await _userManager.UpdateAsync(user);
+            var updateResult = await _userManager.UpdateAsync(UserRequested);
 
             if (!updateResult.Succeeded)
-                return BadRequest(new { message = "Failed to update profile!" });
+            {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is update his profile: {UpdateLogRow}. Error Details: {updateResult.Errors}");
+                return BadRequest(new
+                {
+                    message = "Failed to update profile!",
+                    errors = updateResult.Errors.Select(e => e.Description)
+                });
+            }
 
+            _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has updated his account: {UpdateLogRow}");
             return Ok(new { message = "Profile updated successfully!" });
         }
 
@@ -160,12 +223,12 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
             if (userId == null)
                 return Unauthorized(new { message = "You are not logged in!" });
 
-            var user = await _userManager.FindByIdAsync(userId);
+            User? UserRequested = await _userManager.FindByIdAsync(userId);
 
-            if (user == null)
+            if (UserRequested == null)
                 return NotFound(new { message = "User not found!" });
 
-            var passwordCheck = await _userManager.CheckPasswordAsync(user, model.OldPassword);
+            var passwordCheck = await _userManager.CheckPasswordAsync(UserRequested, model.OldPassword);
 
             if (!passwordCheck)
                 return BadRequest(new { message = "The old password is incorrect." });
@@ -173,16 +236,19 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
             if (model.OldPassword == model.NewPassword)
                 return BadRequest(new { message = "The new password cannot be the same as the old password." });
 
-            var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+            var result = await _userManager.ChangePasswordAsync(UserRequested, model.OldPassword, model.NewPassword);
 
             if (!result.Succeeded)
+            {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is update his password. Error Details: {result.Errors}");
+
                 return BadRequest(new
                 {
                     message = "Failed to change password.",
                     errors = result.Errors.Select(e => e.Description)
                 });
-
-
+            }
+            _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has updated his password.");
             return Ok(new { message = "Password changed successfully!" });
         }
 

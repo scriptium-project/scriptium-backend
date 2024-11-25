@@ -9,10 +9,11 @@ using writings_backend_dotnet.Services;
 namespace writings_backend_dotnet.Controllers.VerseHandler
 {
     [ApiController, Route("verse")]
-    public class VerseController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
+    public class VerseController(ApplicationDBContext db, ICacheService cacheService, ILogger<VerseController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
         private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+        private readonly ILogger<VerseController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         [HttpGet("{ScriptureNumber}/{SectionNumber}/{ChapterNumber}/{VerseNumber}")]
         public async Task<IActionResult> GetVerse([FromRoute] VerseValidatedModel dto)
@@ -20,10 +21,14 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
             VerseSimpleDTO data;
 
             string requestPath = Request.Path.ToString();
+
             VerseSimpleDTO? cache = await _cacheService.GetCachedDataAsync<VerseSimpleDTO>(requestPath);
 
             if (cache != null)  //Checking cache
+            {
+                _logger.LogInformation($"Cache data with URL {requestPath} is found. Sending.");
                 return Ok(new { data = cache });
+            }
 
 
             //Dynamic including, via .Select() can also be used.
@@ -50,10 +55,9 @@ namespace writings_backend_dotnet.Controllers.VerseHandler
             data = verse.ToVerseSimpleDTO();
 
             await _cacheService.SetCacheDataAsync(requestPath, data);
+            _logger.LogInformation($"Cache data for URL {requestPath} is renewing");
 
-            var result = new { data };
-
-            return Ok(result);
+            return Ok(new { data });
         }
 
     }

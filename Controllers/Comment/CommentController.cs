@@ -134,11 +134,11 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
     /// </list>
     /// </remarks>
     [ApiController, Route("comment"), Authorize]
-    public class CommentController(ApplicationDBContext db, UserManager<User> userManager) : ControllerBase
+    public class CommentController(ApplicationDBContext db, UserManager<User> userManager, ILogger<CommentController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
-
+        private readonly ILogger<CommentController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         /// <summary>
         /// The endpoint which bring information about all comments user made. This handler is does not provide public information, implying private for each user individually.
@@ -147,6 +147,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
         /// - 200 OK if the comments found and served to user successfully.
         /// - 401 Unauthorized if the user is not authenticated or lacks permissions.
         /// </returns>
+        [HttpGet, Route("")]
         public async Task<IActionResult> GetComments()
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -168,6 +169,9 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
                                             .Where(c => c.UserId == UserRequested.Id)
                                             .Select(c => c.ToCommentParentUserDTO(c.ParentComment != null && FollowedUserIds.Contains(c.ParentComment.UserId))) //Does UserRequest follow the parent comment owner?
                                             .ToListAsync();
+
+            _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his comments records. {data.Count} row has ben returned.");
+
             return Ok(new { data });
         }
 
@@ -194,19 +198,38 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
 
-            Note? NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.NoteId);
+            try
+            {
+                Note? NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.NoteId);
 
-            if (NoteTarget == null)
-                return NotFound(new { Message = "Note not found." });
+                if (NoteTarget == null)
+                {
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get comments attached Note: [model.NoteId: {model.NoteId}]. Note not found.");
+                    return NotFound(new { Message = "Note not found." });
+                }
 
-            bool isFollowing = await _db.Follow.AnyAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == NoteTarget.UserId && f.Status == FollowStatus.Accepted);
+                bool isFollowing = await _db.Follow.AnyAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == NoteTarget.UserId && f.Status == FollowStatus.Accepted);
 
-            if (!isFollowing)
-                return Unauthorized(new { Message = "You do not have permission to attach comment to this note" });
+                if (!isFollowing)
+                {
+                    _logger.LogWarning($"Unauthorize, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get comments attached Note: [Id: {NoteTarget.Id}, NoteTarget.UserId: {NoteTarget.UserId}, NoteTarget.User.UserName: {NoteTarget.User.UserName}]. User does not follow the owner.");
 
-            List<GetCommentDTO> data = await _db.GetNoteCommentsAsync(UserRequested.Id, NoteTarget.Id);
+                    return Unauthorized(new { Message = "You do not have permission to attach comment to this note" });
+                }
 
-            return Ok(new { data });
+                List<GetCommentDTO> data = await _db.GetNoteCommentsAsync(UserRequested.Id, NoteTarget.Id);
+
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded comments on attached Note: [Id: {NoteTarget.Id}, NoteTarget.UserId: {NoteTarget.UserId}, NoteTarget.User.UserName: {NoteTarget.User.UserName}]. {data.Count} row has ben returned.");
+
+
+                return Ok(new { data });
+            }
+            catch (Exception)
+            {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get comments attached Note: [model.NoteId: {model.NoteId}] Error Details: {model.NoteId}");
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+            }
+
         }
 
         /// <summary>
@@ -235,18 +258,29 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
 
-            Verse? VerseTarget = await _db.Verse
-                .FirstOrDefaultAsync(v => v.Number == model.VerseNumber &&
-                            v.Chapter.Number == model.ChapterNumber &&
-                            v.Chapter.Section.Number == model.SectionNumber &&
-                            v.Chapter.Section.Scripture.Number == model.ScriptureNumber);
+            try
+            {
+                Verse? VerseTarget = await _db.Verse
+                          .FirstOrDefaultAsync(v => v.Number == model.VerseNumber &&
+                                      v.Chapter.Number == model.ChapterNumber &&
+                                      v.Chapter.Section.Number == model.SectionNumber &&
+                                      v.Chapter.Section.Scripture.Number == model.ScriptureNumber);
 
-            if (VerseTarget == null)
-                return NotFound(new { Message = "Verse not found." });
+                if (VerseTarget == null)
+                    return NotFound(new { Message = "Verse not found." });
 
-            List<GetCommentDTO> data = await _db.GetVerseCommentsAsync(UserRequested.Id, VerseTarget.Id);
+                List<GetCommentDTO> data = await _db.GetVerseCommentsAsync(UserRequested.Id, VerseTarget.Id);
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded comments on attached Verse: [Id: {VerseTarget.Id},]. {data.Count} row has ben returned.");
 
-            return Ok(new { data });
+                return Ok(new { data });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get comments attached on Verse: [model.VerseNumber: {model.VerseNumber}, model.ChapterNumber: {model.ChapterNumber}, model.SectionNumber: {model.SectionNumber}, model.ScriptureNumber: {model.ScriptureNumber}] Error Details: {ex}");
+                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+            }
+
+
         }
 
         /// <summary>
@@ -273,53 +307,67 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
 
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
-
-            Note? NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.EntityId && n.UserId == UserRequested.Id);
-
-            if (NoteTarget == null)
-                return NotFound(new { Message = "Note not found." });
-
-
-            Comment? ParentComment = null;
-
-            if (model.ParentCommentId != null)
-            {
-                HashSet<long> ReplyableCommentIdSet = _db.GetAvailableNoteCommentIds(UserRequested.Id, NoteTarget.Id);
-
-                ParentComment = await _db.Comment.FirstOrDefaultAsync(c => c.CommentNote != null && c.CommentNote.NoteId == NoteTarget.Id && c.Id == model.ParentCommentId);
-
-                if (ParentComment == null)
-                    return NotFound(new { Message = "ParentComment not found." });
-
-                if (!ReplyableCommentIdSet.Contains(ParentComment.Id)) //Users can only reply the comments they see.
-                    return Unauthorized(new { Message = "You do not have permission to reply this comment" });
-            }
-
-            Comment CommentCreated = new()
-            {
-                Text = model.CommentText,
-                UserId = UserRequested.Id,
-                ParentCommentId = ParentComment?.Id
-            };
-
-
-            CommentNote CommentNoteCreated = new()
-            {
-                Comment = CommentCreated,
-                NoteId = NoteTarget.Id
-            };
-
-            _db.Comment.Add(CommentCreated);
-            _db.CommentNote.Add(CommentNoteCreated);
-
+            Note? NoteTarget = null;
             try
             {
+
+                NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.EntityId && n.UserId == UserRequested.Id);
+
+                if (NoteTarget == null)
+                {
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create comment on Note: [model.NoteId: {model.EntityId}]. Note not found.");
+
+                    return NotFound(new { Message = "Note not found." });
+                }
+                Comment? ParentComment = null;
+
+                if (model.ParentCommentId != null)
+                {
+                    HashSet<long> ReplyableCommentIdSet = _db.GetAvailableNoteCommentIds(UserRequested.Id, NoteTarget.Id);
+
+                    ParentComment = await _db.Comment.FirstOrDefaultAsync(c => c.CommentNote != null && c.CommentNote.NoteId == NoteTarget.Id && c.Id == model.ParentCommentId);
+
+                    if (ParentComment == null)
+                    {
+                        _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create comment on Note: [Id: {NoteTarget.Id}] and reply for ParentComment: [model.ParentCommentId: {model.ParentCommentId}]");
+
+                        return NotFound(new { Message = "ParentComment not found." });
+                    }
+
+                    if (!ReplyableCommentIdSet.Contains(ParentComment.Id)) //Users can only reply the comments they see.
+                    {
+                        _logger.LogWarning($"Unauthorized, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create comment on Note: [Id: {NoteTarget.Id}] and reply for ParentComment: [model.ParentCommentId: {model.ParentCommentId}]. User does not have permission to reply this comment.");
+
+                        return Unauthorized(new { Message = "You do not have permission to reply this comment" });
+                    }
+                }
+
+                Comment CommentCreated = new()
+                {
+                    Text = model.CommentText,
+                    UserId = UserRequested.Id,
+                    ParentCommentId = ParentComment?.Id
+                };
+
+
+                CommentNote CommentNoteCreated = new()
+                {
+                    Comment = CommentCreated,
+                    NoteId = NoteTarget.Id
+                };
+
+                _db.Comment.Add(CommentCreated);
+                _db.CommentNote.Add(CommentNoteCreated);
+
+
                 await _db.SaveChangesAsync();
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has created on Note: [Id: {NoteTarget.Id}, NoteTarget.UserId: {NoteTarget.UserId}, NoteTarget.User.UserName: {NoteTarget.User.UserName}].");
 
                 return Ok(new { Message = "You have created comment on that note successfully" });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get comments attached on  Note: [Id: {NoteTarget?.Id}, NoteTarget.UserId: {NoteTarget?.UserId}, NoteTarget.User.UserName: {NoteTarget?.User.UserName}]. Error Details: {ex}");
                 return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
@@ -351,52 +399,65 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
 
-            Verse? VerseTarget = await _db.Verse.FirstOrDefaultAsync(v => v.Id == model.EntityId);
-
-            if (VerseTarget == null)
-                return NotFound(new { Message = "Verse not found." });
-
-
-            Comment? ParentComment = null;
-
-            if (model.ParentCommentId != null)
-            {
-                HashSet<long> ReplyableCommentIdSet = _db.GetAvailableVerseCommentIds(UserRequested.Id, VerseTarget.Id);
-
-                ParentComment = await _db.Comment.FirstOrDefaultAsync(c => c.CommentVerse != null && c.CommentVerse.VerseId == VerseTarget.Id && c.Id == model.ParentCommentId);
-
-                if (ParentComment == null)
-                    return NotFound(new { Message = "ParentComment not found." });
-
-                if (!ReplyableCommentIdSet.Contains(ParentComment.Id)) //Users can only reply the comments they see.
-                    return Unauthorized(new { Message = "You do not have permission to reply this comment" });
-            }
-
-            Comment CommentCreated = new()
-            {
-                Text = model.CommentText,
-                UserId = UserRequested.Id,
-                ParentCommentId = ParentComment?.Id
-            };
-
-            CommentVerse CommentVerseCreated = new()
-            {
-                Comment = CommentCreated,
-                VerseId = VerseTarget.Id
-            };
-
-
-            _db.Comment.Add(CommentCreated);
-            _db.CommentVerse.Add(CommentVerseCreated);
+            Verse? VerseTarget = null;
 
             try
             {
+                VerseTarget = await _db.Verse.FirstOrDefaultAsync(v => v.Id == model.EntityId);
+
+                if (VerseTarget == null)
+                    return NotFound(new { Message = "Verse not found." });
+
+
+                Comment? ParentComment = null;
+
+                if (model.ParentCommentId != null)
+                {
+                    HashSet<long> ReplyableCommentIdSet = _db.GetAvailableVerseCommentIds(UserRequested.Id, VerseTarget.Id);
+
+                    ParentComment = await _db.Comment.FirstOrDefaultAsync(c => c.CommentVerse != null && c.CommentVerse.VerseId == VerseTarget.Id && c.Id == model.ParentCommentId);
+
+                    if (ParentComment == null)
+                    {
+                        _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create comment on Verse: [Id: {VerseTarget.Id}] and reply for ParentComment: [model.ParentCommentId: {model.ParentCommentId}]");
+                        return NotFound(new { Message = "ParentComment not found." });
+                    }
+
+                    if (!ReplyableCommentIdSet.Contains(ParentComment.Id)) //Users can only reply the comments they see.
+
+                    {
+                        _logger.LogWarning($"Unauthorized, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create comment on Verse: [Id: {VerseTarget.Id}] and reply for ParentComment: [model.ParentCommentId: {model.ParentCommentId}]. User does not have permission to reply this comment.");
+
+                        return Unauthorized(new { Message = "You do not have permission to reply this comment" });
+                    }
+                }
+
+                Comment CommentCreated = new()
+                {
+                    Text = model.CommentText,
+                    UserId = UserRequested.Id,
+                    ParentCommentId = ParentComment?.Id
+                };
+
+                CommentVerse CommentVerseCreated = new()
+                {
+                    Comment = CommentCreated,
+                    VerseId = VerseTarget.Id
+                };
+
+
+                _db.Comment.Add(CommentCreated);
+                _db.CommentVerse.Add(CommentVerseCreated);
+
+
                 await _db.SaveChangesAsync();
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has created on Verse: [Id: {VerseTarget.Id}].");
 
                 return Ok(new { Message = "You have created comment on that verse successfully" });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get comments attached on Verse: [Id: {VerseTarget?.Id}], Error Details: {ex}");
                 return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
@@ -426,26 +487,31 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
 
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
-
-            Comment? CommentUpdated = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.UserId == UserRequested.Id);
-
-            if (CommentUpdated == null)
-                return NotFound(new { Message = "Comment not found." });
-
-            CommentUpdated.Text = model.NewCommentText;
-            CommentUpdated.UpdatedAt = DateTime.UtcNow;
-
-            _db.Comment.Update(CommentUpdated);
-
+            Comment? CommentUpdated = null;
             try
             {
-                await _db.SaveChangesAsync();
+                CommentUpdated = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.UserId == UserRequested.Id);
 
+                if (CommentUpdated == null)
+                {
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to update Comment: [model.CommentId: {model.CommentId}]. CommentUpdated is not found.");
+                    return NotFound(new { Message = "Comment not found." });
+                }
+
+
+
+                CommentUpdated.Text = model.NewCommentText;
+                CommentUpdated.UpdatedAt = DateTime.UtcNow;
+
+                _db.Comment.Update(CommentUpdated);
+
+                await _db.SaveChangesAsync();
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}]. Updated Comment: [Id: {CommentUpdated.Id}]");
                 return Ok(new { Message = "You have updated the comment!" });
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to update Comment: [Id: {CommentUpdated?.Id}]. Error Details: {ex}");
                 return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
@@ -476,21 +542,31 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
 
-            Comment? CommentDeleted = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.UserId == UserRequested.Id);
-
-            if (CommentDeleted == null)
-                return NotFound(new { Message = "Comment not found." });
-
-            await DeleteCommentRecursively(CommentDeleted);
+            Comment? CommentDeleted = null;
 
             try
             {
+
+                CommentDeleted = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.UserId == UserRequested.Id);
+
+                if (CommentDeleted == null)
+                {
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to delete Comment: [model.CommentId: {model.CommentId}]. CommentDeleted is not found.");
+
+                    return NotFound(new { Message = "Comment not found." });
+                }
+                await DeleteCommentRecursively(CommentDeleted);
+
+
                 await _db.SaveChangesAsync();
+
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}]. Updated Comment: [Id: {CommentDeleted.Id}]. Comment deleted.");
 
                 return Ok(new { Message = "You have deleted the comment successfully" });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] trying to delete Comment: [Id: {CommentDeleted?.Id}]. Error Details: {ex}");
                 return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 

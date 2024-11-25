@@ -12,10 +12,11 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
 {
 
     [ApiController, Route("follow"), Authorize]
-    public class FollowController(ApplicationDBContext db, UserManager<User> userManager) : ControllerBase
+    public class FollowController(ApplicationDBContext db, UserManager<User> userManager, ILogger<FollowController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        private readonly ILogger<FollowController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         [HttpGet("follower/{type}")]
         public async Task<IActionResult> GetFollower([FromRoute] FollowStatus type)
@@ -29,7 +30,6 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             if (UserRequested == null)
                 return NotFound(new { Message = "User not found." });
 
-
             try
             {
                 var data = await _db.Follow
@@ -37,10 +37,13 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
                     .Select(f => new { f.Follower.UserName, f.OccurredAt, IsFrozen = f.Follower.IsFrozen.HasValue })
                     .ToListAsync();
 
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his followER records. {data.Count} row has ben returned.");
+
                 return Ok(new { data });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get followER records. Error Details: {ex}");
                 return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
         }
@@ -53,7 +56,6 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             if (UserId == null)
                 return Unauthorized();
 
-
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
@@ -62,10 +64,14 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             try
             {
                 var data = await _db.Follow.OrderByDescending(f => f.OccurredAt).Where(f => f.FollowerId == UserRequested.Id && f.Status == type).Select(f => new { f.Followed.UserName, f.OccurredAt, IsFrozen = f.Followed.IsFrozen.HasValue }).ToListAsync();
+
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his followED records. {data.Count} row has ben returned.");
                 return Ok(new { data });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get followED records. Error Details: {ex}");
+
                 return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
         }
@@ -83,39 +89,50 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
 
             bool isBlocked;
 
-            if (UserRequested == null || UserFollowed == null || UserFollowed.IsFrozen.HasValue || (isBlocked = await _db.Block.AnyAsync(b => b.BlockedId == UserFollowed.Id && b.BlockerId == UserRequested.Id)))
-                return NotFound(new { Message = "User not found." });
-
-            if (UserRequested.Id == UserFollowed.Id)
-                return BadRequest(new { Message = "You cannot follow yourself." });
-
-            bool isAlreadyFollowing = await _db.Follow.AnyAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == UserFollowed.Id);
-
-            if (isAlreadyFollowing)
-                return Ok(new { Message = "You are already following this user or a follow request is pending." });
-
-
-            bool IsUserFollowedPrivate = UserFollowed.IsPrivate.HasValue;
-
-            Follow follow = new()
-            {
-                Follower = UserRequested,
-                Followed = UserFollowed,
-                Status = IsUserFollowedPrivate ? FollowStatus.Pending : FollowStatus.Accepted
-            };
-
             try
             {
 
+                if (UserRequested == null || UserFollowed == null || UserFollowed.IsFrozen.HasValue || (isBlocked = await _db.Block.AnyAsync(b => b.BlockedId == UserFollowed.Id && b.BlockerId == UserRequested.Id)))
+                    return NotFound(new { Message = "User not found." });
+
+                if (UserRequested.Id == UserFollowed.Id)
+                {
+                    _logger.LogWarning($"Conflict occurred: User: [Id: {UserRequested.Id}, UserName: {UserRequested.Name}] tried to follow himself.");
+                    return BadRequest(new { Message = "You cannot follow yourself." });
+                }
+
+
+                bool isAlreadyFollowing = await _db.Follow.AnyAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == UserFollowed.Id);
+
+                if (isAlreadyFollowing)
+                {
+                    _logger.LogWarning($"Conflict occurred:  User: [Id: {UserRequested.Id}, UserName: {UserRequested.Name}] is already following the User: [Id: {UserFollowed.Id}, UserName: {UserFollowed.Name}] User tried to follow another user which already followed.");
+                    return Ok(new { Message = "You are already following this user or a follow request is pending." });
+                }
+
+
+                bool IsUserFollowedPrivate = UserFollowed.IsPrivate.HasValue;
+
+                Follow follow = new()
+                {
+                    Follower = UserRequested,
+                    Followed = UserFollowed,
+                    Status = IsUserFollowedPrivate ? FollowStatus.Pending : FollowStatus.Accepted
+                };
+
+
                 _db.Follow.Add(follow);
                 await _db.SaveChangesAsync();
+
+                _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, UserName: {UserRequested.Name}] has successfully followed the User: [Id: {UserFollowed.Id}, UserName: {UserFollowed.Name}]. User followed.");
 
                 string Message = IsUserFollowedPrivate ? "Follow request sent successfully." : "You are successfully following the user!";
 
                 return Ok(new { Message });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested?.Id}, UserName: {UserRequested?.Name}] trying to follow User: [Id: {UserFollowed?.Id}, UserName: {UserFollowed?.Name}]. Error Details: {ex}");
                 return BadRequest(new { Message = "Something went unexpectedly wrong?" });
             }
 
@@ -138,10 +155,14 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
 
             try
             {
+
                 Follow? Follow = await _db.Follow.OrderByDescending(f => f.OccurredAt).FirstOrDefaultAsync(f => f.FollowedId == UserRequested.Id && f.FollowerId == UserAccepted.Id && f.Status == FollowStatus.Pending);
 
-
-                if (Follow == null) return BadRequest(new { Message = "Follow request either is already accepted or retrieved from the user!" });
+                if (Follow == null)
+                {
+                    _logger.LogWarning($"Not Found, while: Trying to ACCEPT follow request to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserAccepted.Id}, UserName: {UserAccepted.UserName}]. There is no pending follow request to ACCEPT.");
+                    return BadRequest(new { Message = "Follow request either is already accepted or retrieved from the user!" });
+                }
 
                 Follow.OccurredAt = DateTime.Now;
                 Follow.Status = FollowStatus.Accepted;
@@ -149,11 +170,13 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
                 _db.Follow.Update(Follow);
                 await _db.SaveChangesAsync();
 
+                _logger.LogInformation($"Operation completed: The pending follow request has been ACCEPTED to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserAccepted.Id}, UserName: {UserAccepted.UserName}]. Follow request accepted.");
                 return Ok(new { Message = "Follow request is successfully accepted!" });
 
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: Trying to ACCEPT pending follow request to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserAccepted.Id}, UserName: {UserAccepted.UserName}]. Error Details: {ex} ");
                 return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
 
@@ -177,20 +200,26 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             {
                 Follow? Follow = await _db.Follow.OrderByDescending(f => f.OccurredAt).FirstOrDefaultAsync(f => f.FollowedId == UserRequested.Id && f.FollowerId == UserRejected.Id && f.Status == FollowStatus.Pending);
 
-                if (Follow == null) return BadRequest(new { Message = "Follow request either is already accepted or retrieved from the user!" });
+                if (Follow == null)
+                {
+                    _logger.LogWarning($"Not Found, while: Trying to REJECT follow request to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserRejected.Id}, UserName: {UserRejected.UserName}]. There is no pending follow request to REJECT.");
+                    return BadRequest(new { Message = "Follow request either is already accepted or retrieved from the user!" });
+
+                }
 
                 _db.Follow.Remove(Follow);
                 await _db.SaveChangesAsync();
 
-
+                _logger.LogInformation($"Operation completed: The pending follow request has been REJECTED to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserRejected.Id}, UserName: {UserRejected.UserName}]. Follow request rejected.");
                 return Ok(new { Message = "The request is successfully rejected!" });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}]  trying to unfollow User: [Id: {UserRejected.Id}, UserName: {UserRejected.UserName}]. Error Details: {ex} ");
                 return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
         }
-
+        //TODO: Continue;
         [HttpDelete, Route("unfollow")]
         public async Task<IActionResult> Unfollow([FromBody] UserNameModel model)
         {
@@ -209,17 +238,21 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             {
                 Follow? Follow = await _db.Follow.OrderByDescending(f => f.OccurredAt).FirstOrDefaultAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == UserUnfollowed.Id && f.Status == FollowStatus.Accepted);
 
-                if (Follow == null) return BadRequest(new { Message = "You are already not following the user!" });
+                if (Follow == null)
+                {
+                    _logger.LogWarning($"Conflict occurred:  User: [Id: {UserRequested.Id}, UserName: {UserRequested.Name}] is already NOT following the User: [Id: {UserUnfollowed.Id}, UserName: {UserUnfollowed.Name}]. User tried to follow another user which already followed.");
+                    return BadRequest(new { Message = "You are already not following the user!" });
+                }
 
                 _db.Follow.Remove(Follow);
                 await _db.SaveChangesAsync();
 
-
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, UserName: {UserRequested.Name}] has successfully UNfollowed the User: [Id: {UserUnfollowed.Id}, UserName: {UserUnfollowed.Name}]. User unfollowed.");
                 return Ok(new { Message = "The user is successfully unfollowed!" });
-
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: The follow record is trying to be DELETED follow request to User: [Id: {UserUnfollowed.Id}, UserName: {UserUnfollowed.UserName}] from User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}]. Error Details: {ex} ");
                 return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
         }
@@ -242,17 +275,23 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             {
                 Follow? Follow = await _db.Follow.OrderByDescending(f => f.OccurredAt).FirstOrDefaultAsync(f => f.FollowedId == UserRequested.Id && f.FollowerId == UserRemoved.Id && f.Status == FollowStatus.Accepted);
 
-
-                if (Follow == null) return BadRequest(new { Message = "The user is not following you!" });
+                if (Follow == null)
+                {
+                    _logger.LogWarning($"There is no follow record to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserRemoved.Id}, UserName: {UserRemoved.UserName}]");
+                    return BadRequest(new { Message = "The user is not following you!" });
+                }
 
                 _db.Follow.Remove(Follow);
                 await _db.SaveChangesAsync();
+                _logger.LogInformation($"Operation completed: The follow record has been DELETED to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserRemoved.Id}, UserName: {UserRemoved.UserName}]");
 
                 return Ok(new { Message = "You have successfully removed the user!" });
 
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: DELETING follow record to User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}] from User: [Id: {UserRemoved.Id}, UserName: {UserRemoved.UserName}]. Error Details: {ex} ");
+
                 return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
         }
@@ -275,16 +314,22 @@ namespace writings_backend_dotnet.Controllers.FollowHandler
             {
                 Follow? Follow = await _db.Follow.OrderByDescending(f => f.OccurredAt).FirstOrDefaultAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == UserRetrieved.Id && f.Status == FollowStatus.Pending);
 
-                if (Follow == null) return BadRequest(new { Message = "You do not have pending request for this user!" });
+                if (Follow == null)
+                {
+                    _logger.LogWarning($"There is pending request to RETRIEVE to User: [Id: {UserRetrieved.Id}, UserName: {UserRetrieved.UserName}] from User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}]");
+                    return BadRequest(new { Message = "You do not have pending request for this user!" });
+                }
 
                 _db.Follow.Remove(Follow);
                 await _db.SaveChangesAsync();
+                _logger.LogInformation($"Operation completed: The pending follow request has been RETRIEVED to User: [Id: {UserRetrieved.Id}, UserName: {UserRetrieved.UserName}] from User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}]");
 
                 return Ok(new { Message = "The follow request is successfully retrieved!" });
 
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError($"Error occurred, while: RETRIEVING follow request to User: [Id: {UserRetrieved.Id}, UserName: {UserRetrieved.UserName}] from User: [Id: {UserRequested.Id}, UserName: {UserRequested.UserName}]. Error Details: {ex} ");
                 return StatusCode(500, new { Message = "Something went unexpectedly wrong?" });
             }
         }

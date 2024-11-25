@@ -17,9 +17,9 @@ namespace writings_backend_dotnet.Controllers.Validation
             .Cascade(CascadeMode.Stop)
             .Must(number => number >= 1)
             .WithMessage("Scripture number is too small; minimum is 1.")
-            .Must(SCRIPTURE_DATA.ContainsKey)
+            .Must(Utility.SCRIPTURE_DATA.ContainsKey)
             .WithMessage(r => $"Scripture number {r.ScriptureNumber} is not valid.");
-            RuleFor(r => r.RootLatin).MinimumLength(MIN_LENGTH_FOR_ROOT).MaximumLength(MAX_LENGTH_FOR_ROOT);
+            RuleFor(r => r.RootLatin).MinimumLength(Utility.MIN_LENGTH_FOR_ROOT).MaximumLength(Utility.MAX_LENGTH_FOR_ROOT);
 
         }
 

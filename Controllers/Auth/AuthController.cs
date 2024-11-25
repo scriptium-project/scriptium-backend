@@ -42,12 +42,12 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
     /// </list>
     /// </remarks>
     [ApiController, Route("auth")]
-    public class AuthController(ApplicationDBContext db, UserManager<User> userManager, SignInManager<User> signInManager) : ControllerBase
+    public class AuthController(ApplicationDBContext db, UserManager<User> userManager, SignInManager<User> signInManager, ILogger<AuthController> logger) : ControllerBase
     {
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         private readonly SignInManager<User> _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
-
+        private readonly ILogger<AuthController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         /// <summary>
         /// Register operation and necessary cookie processes. For validation model: <see cref="RegisterModel"/>
@@ -63,6 +63,8 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
         [HttpPost, Route("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
+            _logger.LogInformation($"An registration process began.");
+
             var user = new User
             {
                 UserName = model.Username,
@@ -75,6 +77,9 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
 
             if (Result.Succeeded)
             {
+                _logger.LogInformation($"Operation completed: New User information: Identifier: {user.Id}, Username: {user.UserName}, Email: {user.Email}, Name: {user.Name} Surname: {user.Surname} CreatedAt: {user.CreatedAt}");
+
+
                 Collection DefaultCollection = new() //Default collection schema. Whenever a user registered a default collection should be created. Check: ../../DB/Triggers.sql and check trigger named: trg_CreateCollectionOnUserInsert
                 {
                     Name = "", //Default Collection Name
@@ -82,17 +87,28 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
                 };
 
                 _db.Collection.Add(DefaultCollection);
+
                 await _db.SaveChangesAsync();
+
+                _logger.LogInformation($"Default collection has been created for User: [Id: {user.Id}, Username: {user.UserName}]");
 
                 return Ok(new { Message = "Registration successful!" });
             }
 
             if (Result.Errors.Any(e => e.Code == "DuplicateUserName"))
+
+            {
+                _logger.LogInformation($"Registration failed: Duplicated username tried to be created.  Duplicated username {user.UserName} Email: {user.Email}");
                 return BadRequest(new { Message = "Username already exists." });
+            }
 
             if (Result.Errors.Any(e => e.Code == "DuplicateEmail"))
+            {
+                _logger.LogInformation($"Registration failed: Duplicated Email tried to be created. Duplicated Email: {user.Email} Username: {user.UserName}");
                 return BadRequest(new { Message = "Email already exists." });
 
+            }
+            _logger.LogInformation($"Registration failed: Errors occurred: {Result.Errors}");
             return BadRequest(Result.Errors);
         }
 
@@ -114,28 +130,40 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
             User? UserRequested = await _userManager.FindByNameAsync(model.Username);
 
             if (UserRequested == null)
+            {
+                _logger.LogInformation($"Login failed: User with that name is not found. Claimed Username: {model.Username}");
                 return BadRequest(new { Message = "Invalid Credentials!" });
+            }
 
             var Result = await _signInManager.CheckPasswordSignInAsync(UserRequested, model.Password, lockoutOnFailure: false);
 
             if (!Result.Succeeded)
+            {
+                _logger.LogInformation($"Password is incompatible. Claimed password: {model.Password} for User: [Id: {UserRequested.Id}]");
                 return BadRequest(new { Message = "Invalid Credentials!" });
-
+            }
 
             if (UserRequested.IsFrozen != null)
             {
-                var freezeR = new FreezeR
+
+                FreezeR freezeR = new()
                 {
                     UserId = UserRequested.Id,
                     Status = FreezeStatus.Unfrozen
                 };
 
+                UserRequested.IsFrozen = null;
+
                 _db.FreezeR.Add(freezeR);
+
                 await _db.SaveChangesAsync();
+                await _userManager.UpdateAsync(UserRequested);
+                _logger.LogInformation($"User had been frozen, melted, User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}]");
             }
 
             await _signInManager.SignInAsync(UserRequested, isPersistent: true);
-            await _userManager.UpdateAsync(UserRequested);
+
+            _logger.LogInformation($"User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has logged in.");
 
             return Ok(new { Message = "Successfully logged in!" });
         }

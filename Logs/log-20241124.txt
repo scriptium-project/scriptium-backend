@@ -1,0 +1,21 @@
+2024-11-24 22:09:55 [INF] Application is starting...
+2024-11-24 22:10:12 [WRN] Failed to determine the https port for redirect.
+2024-11-24 22:10:14 [WRN] The foreign key property 'Suggestion.TranslationTextId1' was created in shadow state because a conflicting property with the simple name 'TranslationTextId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+2024-11-24 22:10:14 [WRN] The property 'Id' on entity type 'Scripture' is of type 'byte', but is set up to use a SQL Server identity column; this requires that values starting at 255 and counting down will be used for temporary key values. A temporary key value is needed for every entity inserted in a single call to 'SaveChanges'. Care must be taken that these values do not collide with real key values.
+2024-11-24 22:10:15 [INF] Login failed: User with that name is not found. Claimed Username: Prag1974
+2024-11-24 22:10:15 [INF] HTTP POST /auth/login responded 400 in 2506.2212 ms
+2024-11-24 22:10:43 [INF] RetrieveAsync called for SessionId: 1d8aeb04-282f-467c-88a1-3261feed48aa.
+2024-11-24 22:10:43 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1d8aeb04-282f-467c-88a1-3261feed48aa.
+2024-11-24 22:10:43 [INF] Login failed: User with that name is not found. Claimed Username: Prag1974
+2024-11-24 22:10:43 [INF] HTTP POST /auth/login responded 400 in 323.6727 ms
+2024-11-24 22:10:56 [INF] RetrieveAsync called for SessionId: 1d8aeb04-282f-467c-88a1-3261feed48aa.
+2024-11-24 22:10:56 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1d8aeb04-282f-467c-88a1-3261feed48aa.
+2024-11-24 22:10:56 [INF] An registration process began.
+2024-11-24 22:10:56 [INF] Registration failed: Duplicated Email tried to be created. Duplicated Email: userxdxdXD@example.com Username: Prag1974
+2024-11-24 22:10:56 [INF] HTTP POST /auth/register responded 400 in 162.6348 ms
+2024-11-24 22:11:15 [INF] RetrieveAsync called for SessionId: 1d8aeb04-282f-467c-88a1-3261feed48aa.
+2024-11-24 22:11:15 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1d8aeb04-282f-467c-88a1-3261feed48aa.
+2024-11-24 22:11:15 [INF] An registration process began.
+2024-11-24 22:11:15 [INF] Registration process has been accomplished. New User information: Identifier: a85cee4b-41b9-4fb0-b8a9-0aef568ff77a, Username: Prag1974, Name: string, CreatedAt: 24.11.2024 19:11:15
+2024-11-24 22:11:15 [INF] Default collection has been created for User: [Id: a85cee4b-41b9-4fb0-b8a9-0aef568ff77a, Username: Prag1974]
+2024-11-24 22:11:15 [INF] HTTP POST /auth/register responded 200 in 313.7136 ms

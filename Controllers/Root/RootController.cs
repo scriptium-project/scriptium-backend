@@ -10,10 +10,11 @@ namespace writings_backend_dotnet.Controllers.RootHandler
 {
 
     [ApiController, Route("root")]
-    public class RootController(ApplicationDBContext db, ICacheService cacheService) : ControllerBase
+    public class RootController(ApplicationDBContext db, ICacheService cacheService, ILogger<RootController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
         private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+        private readonly ILogger<RootController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
 
         [HttpGet("{ScriptureNumber}/{RootLatin}")]
@@ -26,7 +27,10 @@ namespace writings_backend_dotnet.Controllers.RootHandler
             RootExpandedDTO? cache = await _cacheService.GetCachedDataAsync<RootExpandedDTO>(requestPath);
 
             if (cache != null)  //Checking cache
+            {
+                _logger.LogInformation($"Cache data with URL {requestPath} is found. Sending.");
                 return Ok(new { data = cache });
+            }
 
 
             Root? root = await _db.Root.AsNoTracking()
@@ -35,18 +39,16 @@ namespace writings_backend_dotnet.Controllers.RootHandler
                                         .Include(r => r.Words).ThenInclude(w => w.Verse)
                                         .FirstOrDefaultAsync(r => r.Latin == dto.RootLatin && r.Scripture.Number == dto.ScriptureNumber);
 
-            if (root == null) return NotFound("There is no root matches with this information.");
+            if (root == null)
+                return NotFound("There is no root matches with this information.");
 
             data = root.ToRootExpandedDTO();
 
             await _cacheService.SetCacheDataAsync(requestPath, data);
+            _logger.LogInformation($"Cache data for URL {requestPath} is renewing");
 
-            var result = new
-            {
-                data
-            };
 
-            return Ok(result);
+            return Ok(new { data });
         }
     }
 }
