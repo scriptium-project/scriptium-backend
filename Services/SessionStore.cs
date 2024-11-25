@@ -119,7 +119,8 @@ namespace writings_backend_dotnet.Services
                 var claims = new List<Claim>
                 {
                     new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new(ClaimTypes.Name, user.UserName),
+                    new(ClaimTypes.Name, user.Id.ToString()),
+                    new(ClaimTypes.UserData, user?.UserName ?? "\\0"),
                 };
 
                 var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);

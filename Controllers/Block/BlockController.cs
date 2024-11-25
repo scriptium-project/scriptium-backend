@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using writings_backend_dotnet.Controllers.Validation;
@@ -10,7 +11,7 @@ using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.Controllers.BlockHandler
 {
-    [ApiController, Route("block"), Authorize]
+    [ApiController, Route("block"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class BlockController(ApplicationDBContext db, UserManager<User> userManager, ILogger<BlockController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
@@ -9,7 +10,7 @@ using writings_backend_dotnet.Models;
 namespace writings_backend_dotnet.Controllers.NotificationHandler
 {
 
-    [ApiController, Route("notification"), Authorize]
+    [ApiController, Route("notification"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class NotificationController(ApplicationDBContext db, UserManager<User> userManager, ILogger<NotificationController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));

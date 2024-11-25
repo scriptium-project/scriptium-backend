@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
@@ -133,7 +134,7 @@ namespace writings_backend_dotnet.Controllers.CommentHandler
     ///     </item>
     /// </list>
     /// </remarks>
-    [ApiController, Route("comment"), Authorize]
+    [ApiController, Route("comment"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class CommentController(ApplicationDBContext db, UserManager<User> userManager, ILogger<CommentController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));

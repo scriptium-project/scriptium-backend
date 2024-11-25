@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
@@ -8,7 +9,7 @@ using writings_backend_dotnet.Services;
 
 namespace writings_backend_dotnet.Controllers.VerseHandler
 {
-    [ApiController, Route("verse")]
+    [ApiController, Route("verse"), EnableRateLimiting(policyName: "StaticControllerRateLimiter")]
     public class VerseController(ApplicationDBContext db, ICacheService cacheService, ILogger<VerseController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));

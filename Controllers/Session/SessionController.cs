@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
@@ -10,7 +11,7 @@ using writings_backend_dotnet.Models.Util;
 
 namespace writings_backend_dotnet.Controllers.SessionHandler
 {
-    [ApiController, Route("session"), Authorize]
+    [ApiController, Route("session"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class SessionController(ApplicationDBContext db, ILogger<SessionController> logger, SignInManager<User> signInManager, UserManager<User> userManager) : ControllerBase
     {
         private readonly ILogger<SessionController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -72,7 +73,7 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
             }
         }
 
-        [HttpPost, Route("freeze")]
+        [HttpPost, Route("freeze"), EnableRateLimiting(policyName: "UpdateActionRateLimit")]
         public async Task<IActionResult> Freeze()
         {
             FreezeR? FreezeRecord;

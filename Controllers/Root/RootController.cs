@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
@@ -9,7 +10,7 @@ using writings_backend_dotnet.Services;
 namespace writings_backend_dotnet.Controllers.RootHandler
 {
 
-    [ApiController, Route("root")]
+    [ApiController, Route("root"), EnableRateLimiting(policyName: "StaticControllerRateLimiter")]
     public class RootController(ApplicationDBContext db, ICacheService cacheService, ILogger<RootController> logger) : ControllerBase
     {
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));

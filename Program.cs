@@ -6,6 +6,8 @@ using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Services;
 using Serilog;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,43 @@ Log.Logger = new LoggerConfiguration()
 Log.Information("Application is starting..."); // Test log entry
 
 builder.Host.UseSerilog();
+
+builder.Services.AddRateLimiter(option =>
+{
+    option.AddFixedWindowLimiter(policyName: "StaticControllerRateLimiter", windowsOptions =>
+    {
+        windowsOptions.PermitLimit = 3;
+        windowsOptions.Window = TimeSpan.FromSeconds(10);
+    });
+
+    option.AddFixedWindowLimiter(policyName: "AuthControllerRateLimit", windowsOptions =>
+    {
+        windowsOptions.PermitLimit = 10;
+        windowsOptions.Window = TimeSpan.FromDays(1);
+    });
+
+    option.AddFixedWindowLimiter(policyName: "InteractionControllerRateLimit", windowsOptions =>
+    {
+        windowsOptions.PermitLimit = 200;
+        windowsOptions.Window = TimeSpan.FromDays(1);
+    });
+
+    option.AddFixedWindowLimiter(policyName: "UpdateActionRateLimit", windowsOptions =>
+    {
+        windowsOptions.PermitLimit = 2;
+        windowsOptions.Window = TimeSpan.FromDays(1);
+    });
+
+    option.OnRejected = async (context, CancellationToken) =>
+    {
+        ILogger<Program> logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("Rate limit exceeded for {Path} from User {User}", context.HttpContext.Request.Path, context.HttpContext.User.Identity?.Name ?? "unknown");
+
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsync("Rate limit exceeded. Please try again later.", CancellationToken);
+    };
+});
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -76,9 +115,13 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     })
     .AddNewtonsoftJson(options =>
+
     {
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
+
+
+
 
 builder.Services.AddFluentValidationAutoValidation();
 
@@ -94,10 +137,14 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
+
 app.UseRouting();
+
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseRateLimiter();
 
 app.MapControllers();
 

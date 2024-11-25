@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.Controllers.Validation;
 using writings_backend_dotnet.DB;
@@ -10,7 +11,7 @@ using writings_backend_dotnet.Models;
 
 namespace writings_backend_dotnet.Controllers.SavingHandler
 {
-    [ApiController, Route("saving"), Authorize]
+    [ApiController, Route("saving"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class SavingController(ApplicationDBContext db, UserManager<User> userManager, ILogger<SavingController> logger) : ControllerBase
     {
         //TODO: Amend

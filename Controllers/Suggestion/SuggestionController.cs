@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models;
@@ -14,7 +15,7 @@ using writings_backend_dotnet.Validation;
 namespace writings_backend_dotnet.Controllers.SuggestionHandler
 {
 
-    [ApiController, Route("suggestion"), Authorize]
+    [ApiController, Route("suggestion"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class SuggestionController(ApplicationDBContext db, UserManager<User> userManager, ILogger<SuggestionController> logger) : ControllerBase
     {
 

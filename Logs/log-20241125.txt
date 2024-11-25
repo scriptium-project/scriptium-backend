@@ -1,0 +1,223 @@
+2024-11-25 14:07:30 [INF] Application is starting...
+2024-11-25 14:07:44 [WRN] Failed to determine the https port for redirect.
+2024-11-25 14:07:46 [WRN] The foreign key property 'Suggestion.TranslationTextId1' was created in shadow state because a conflicting property with the simple name 'TranslationTextId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+2024-11-25 14:07:46 [WRN] The property 'Id' on entity type 'Scripture' is of type 'byte', but is set up to use a SQL Server identity column; this requires that values starting at 255 and counting down will be used for temporary key values. A temporary key value is needed for every entity inserted in a single call to 'SaveChanges'. Care must be taken that these values do not collide with real key values.
+2024-11-25 14:07:47 [INF] StoreAsync called to create a new session.
+2024-11-25 14:07:47 [INF] Generated new SessionId: 1082455a-240f-41e6-a391-04911adc6ccd for UserId: a85cee4b-41b9-4fb0-b8a9-0aef568ff77a.
+2024-11-25 14:07:47 [INF] Session with SessionId: 1082455a-240f-41e6-a391-04911adc6ccd successfully stored in the database.
+2024-11-25 14:07:47 [INF] User: [Id: a85cee4b-41b9-4fb0-b8a9-0aef568ff77a, Username: Prag1974] has logged in.
+2024-11-25 14:07:47 [INF] HTTP POST /auth/login responded 200 in 3265.7302 ms
+2024-11-25 14:07:52 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:52 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:52 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:52 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 316.2753 ms
+2024-11-25 14:07:53 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:53 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:53 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:53 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 55.7744 ms
+2024-11-25 14:07:54 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:54 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:54 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:54 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 36.7043 ms
+2024-11-25 14:07:54 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:54 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:54 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:54 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 24.0866 ms
+2024-11-25 14:07:55 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:55 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:55 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:55 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 43.2707 ms
+2024-11-25 14:07:56 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:56 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:56 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:56 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 39.4628 ms
+2024-11-25 14:07:57 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:57 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:57 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:57 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 28.1979 ms
+2024-11-25 14:07:58 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:58 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:07:58 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:07:58 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 55.7494 ms
+2024-11-25 14:08:01 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:01 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:01 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:01 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 24.6363 ms
+2024-11-25 14:08:03 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:03 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:03 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:03 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 22.3878 ms
+2024-11-25 14:08:03 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:03 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:03 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:03 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 21.0264 ms
+2024-11-25 14:08:05 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:05 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:05 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:05 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 21.8297 ms
+2024-11-25 14:08:26 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:26 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:27 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:27 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 68.7087 ms
+2024-11-25 14:08:27 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:27 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:28 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:28 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 45.7185 ms
+2024-11-25 14:08:28 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:28 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:28 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:28 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 26.6613 ms
+2024-11-25 14:08:29 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:29 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:29 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:29 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 41.2329 ms
+2024-11-25 14:08:30 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:30 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:30 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:30 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 29.7465 ms
+2024-11-25 14:08:31 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:31 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:08:31 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:31 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 25.8762 ms
+2024-11-25 14:08:43 [INF] Application is starting...
+2024-11-25 14:08:52 [WRN] Failed to determine the https port for redirect.
+2024-11-25 14:08:53 [WRN] The foreign key property 'Suggestion.TranslationTextId1' was created in shadow state because a conflicting property with the simple name 'TranslationTextId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+2024-11-25 14:08:53 [WRN] The property 'Id' on entity type 'Scripture' is of type 'byte', but is set up to use a SQL Server identity column; this requires that values starting at 255 and counting down will be used for temporary key values. A temporary key value is needed for every entity inserted in a single call to 'SaveChanges'. Care must be taken that these values do not collide with real key values.
+2024-11-25 14:08:54 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:08:54 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 2533.0614 ms
+2024-11-25 14:09:00 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:01 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:01 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:09:01 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 355.5424 ms
+2024-11-25 14:09:02 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:02 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:02 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:09:02 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 37.9055 ms
+2024-11-25 14:09:03 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:03 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:03 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:09:03 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 28.3446 ms
+2024-11-25 14:09:04 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:04 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:04 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:09:04 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 30.8045 ms
+2024-11-25 14:09:04 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:04 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:04 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:09:04 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 23.3530 ms
+2024-11-25 14:09:05 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:05 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:05 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User Prag1974
+2024-11-25 14:09:05 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 21.1050 ms
+2024-11-25 14:09:06 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:06 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:06 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User Prag1974
+2024-11-25 14:09:06 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 23.5994 ms
+2024-11-25 14:09:07 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:07 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:07 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User Prag1974
+2024-11-25 14:09:07 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 12.1242 ms
+2024-11-25 14:09:08 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:08 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:09:08 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User Prag1974
+2024-11-25 14:09:08 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 10.3204 ms
+2024-11-25 14:11:27 [INF] Application is starting...
+2024-11-25 14:11:29 [WRN] Failed to determine the https port for redirect.
+2024-11-25 14:11:31 [WRN] The foreign key property 'Suggestion.TranslationTextId1' was created in shadow state because a conflicting property with the simple name 'TranslationTextId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+2024-11-25 14:11:31 [WRN] The property 'Id' on entity type 'Scripture' is of type 'byte', but is set up to use a SQL Server identity column; this requires that values starting at 255 and counting down will be used for temporary key values. A temporary key value is needed for every entity inserted in a single call to 'SaveChanges'. Care must be taken that these values do not collide with real key values.
+2024-11-25 14:11:32 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:11:32 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 2380.0656 ms
+2024-11-25 14:11:35 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:36 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:36 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:11:36 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 423.0168 ms
+2024-11-25 14:11:36 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:36 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:36 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:11:36 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 52.3609 ms
+2024-11-25 14:11:37 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:37 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:37 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User a85cee4b-41b9-4fb0-b8a9-0aef568ff77a
+2024-11-25 14:11:37 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 27.9662 ms
+2024-11-25 14:11:38 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:38 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:38 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User a85cee4b-41b9-4fb0-b8a9-0aef568ff77a
+2024-11-25 14:11:38 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 19.4641 ms
+2024-11-25 14:11:39 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:39 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:39 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User a85cee4b-41b9-4fb0-b8a9-0aef568ff77a
+2024-11-25 14:11:39 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 11.6355 ms
+2024-11-25 14:11:40 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:40 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:40 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:11:40 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 32.1738 ms
+2024-11-25 14:11:41 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:41 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:41 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:11:41 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 28.8272 ms
+2024-11-25 14:11:41 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:41 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:41 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:11:41 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 31.5069 ms
+2024-11-25 14:11:42 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:42 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:42 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User a85cee4b-41b9-4fb0-b8a9-0aef568ff77a
+2024-11-25 14:11:42 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 10.8601 ms
+2024-11-25 14:11:43 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:43 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:11:43 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User a85cee4b-41b9-4fb0-b8a9-0aef568ff77a
+2024-11-25 14:11:43 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 15.1995 ms
+2024-11-25 14:12:36 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:12:36 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:12:36 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:12:36 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 64.6915 ms
+2024-11-25 14:12:38 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:12:38 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:12:38 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:12:38 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 43.5383 ms
+2024-11-25 14:12:47 [INF] Application is starting...
+2024-11-25 14:13:01 [WRN] Failed to determine the https port for redirect.
+2024-11-25 14:13:02 [WRN] The foreign key property 'Suggestion.TranslationTextId1' was created in shadow state because a conflicting property with the simple name 'TranslationTextId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+2024-11-25 14:13:02 [WRN] The property 'Id' on entity type 'Scripture' is of type 'byte', but is set up to use a SQL Server identity column; this requires that values starting at 255 and counting down will be used for temporary key values. A temporary key value is needed for every entity inserted in a single call to 'SaveChanges'. Care must be taken that these values do not collide with real key values.
+2024-11-25 14:13:03 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:13:03 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 2113.8741 ms
+2024-11-25 14:13:05 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:05 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:05 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:13:05 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 310.0354 ms
+2024-11-25 14:13:06 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:06 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:06 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:13:06 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 26.8431 ms
+2024-11-25 14:13:07 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:07 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:07 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User unknown
+2024-11-25 14:13:07 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 14.5309 ms
+2024-11-25 14:13:08 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:08 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:08 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User unknown
+2024-11-25 14:13:08 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 11.1650 ms
+2024-11-25 14:13:09 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:09 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:09 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User unknown
+2024-11-25 14:13:09 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 14.4987 ms
+2024-11-25 14:13:10 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:10 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:13:10 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User unknown
+2024-11-25 14:13:10 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 8.2209 ms
+2024-11-25 14:14:05 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:05 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:05 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:14:05 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 57.0805 ms
+2024-11-25 14:14:06 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:06 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:06 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:14:06 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 24.8290 ms
+2024-11-25 14:14:07 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:07 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:07 [INF] Cache data with URL /verse/1/1/1/1 is found. Sending.
+2024-11-25 14:14:07 [INF] HTTP GET /verse/1/1/1/1 responded 200 in 25.5472 ms
+2024-11-25 14:14:07 [INF] RetrieveAsync called for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:07 [INF] RetrieveAsync: Authentication ticket created for SessionId: 1082455a-240f-41e6-a391-04911adc6ccd.
+2024-11-25 14:14:07 [WRN] Rate limit exceeded for /verse/1/1/1/1 from User a85cee4b-41b9-4fb0-b8a9-0aef568ff77a
+2024-11-25 14:14:07 [INF] HTTP GET /verse/1/1/1/1 responded 429 in 12.6090 ms
