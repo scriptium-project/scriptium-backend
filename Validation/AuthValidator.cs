@@ -52,10 +52,19 @@ namespace writings_backend_dotnet.Controllers.Validation
                 .WithMessage("Invalid gender. Allowed values are 'M', 'F', or 'O'.");
 
             RuleFor(r => r.Image)
-                              .Must(File => File != null && Path.GetExtension(File.FileName).Equals(".jpeg", StringComparison.InvariantCultureIgnoreCase)).WithMessage("Only jpeg files are allowed.")
+                              .Must(IsAllowedExtension).WithMessage("Only JPEG or JPG files are allowed.")
                               .Must(File => File != null && File.Length <= _maxFileSize).WithMessage($"Image size must be less than {_maxFileSize / (1024 * 1024)} MB.")
                               .Must(IsValidImage).WithMessage($"Image must be {_requiredWidth}x{_requiredHeight} pixels and square.");
+        }
 
+        private bool IsAllowedExtension(IFormFile? File)
+        {
+            if (File == null)
+                return false;
+
+            string[] allowedExtensions = [".jpg", ".jpeg"];
+            string extension = Path.GetExtension(File.FileName).ToLowerInvariant();
+            return allowedExtensions.Contains(extension);
         }
 
         private bool IsValidImage(IFormFile? File)

@@ -6,9 +6,7 @@ using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Services;
 using Serilog;
 using Microsoft.AspNetCore.RateLimiting;
-using FluentValidation;
 using FluentValidation.AspNetCore;
-using writings_backend_dotnet.Controllers.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,7 +106,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = "YourAppCookie";
 });
 
-builder.Services.AddFluentValidationAutoValidation().AddValidatorsFromAssemblyContaining<AuthValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
