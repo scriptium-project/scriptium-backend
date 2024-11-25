@@ -96,7 +96,7 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
 
 
         [HttpPost, Route("create")]
-        public async Task<IActionResult> CreateNote([FromBody] NoteCreateModel model)
+        public async Task<IActionResult> CreateNote([FromBody] NoteModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -140,7 +140,7 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
 
 
         [HttpPut, Route("update")]
-        public async Task<IActionResult> UpdateNote([FromBody] NoteUpdateModel model)
+        public async Task<IActionResult> UpdateNote([FromBody] NoteModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -156,14 +156,15 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
 
             try
             {
-                NoteUpdated = await _db.Note.FirstOrDefaultAsync(n => n.UserId == UserRequested.Id && n.Id == model.NoteId);
+                Verse? VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Number == model.Verse.VerseNumber && v.Chapter.Number == model.Verse.ChapterNumber && v.Chapter.Section.Number == model.Verse.SectionNumber && v.Chapter.Section.Scripture.Number == model.Verse.ScriptureNumber);
+
+                if (VerseAttached == null)
+                    return NotFound(new { Message = "Verse not found." });
+
+                NoteUpdated = await _db.Note.FirstOrDefaultAsync(n => n.UserId == UserRequested.Id && n.VerseId == VerseAttached.Id);
 
                 if (NoteUpdated == null)
                     return NotFound(new { Message = "Note not found." });
-
-
-                NoteUpdated.Text = model.NewNoteText;
-                NoteUpdated.UpdatedAt = DateTime.UtcNow;
 
                 _db.Note.Update(NoteUpdated);
 
