@@ -164,6 +164,18 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
                     return BadRequest(new { message = "Invalid language ID!" });
             }
 
+            if (model.Image != null && model.Image.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+
+                await model.Image.CopyToAsync(memoryStream);
+
+                UserRequested.Image = memoryStream.ToArray();
+
+                UpdateLogRow += $" Profile Image updated.";
+            }
+
+
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
                 UpdateLogRow += $" Name: {UserRequested.Name} -> {model.Name.Trim()}";

@@ -1,4 +1,3 @@
-using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -7,7 +6,9 @@ using writings_backend_dotnet.Models;
 using writings_backend_dotnet.Services;
 using Serilog;
 using Microsoft.AspNetCore.RateLimiting;
-using System.Threading.RateLimiting;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using writings_backend_dotnet.Controllers.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,17 +24,17 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 
-
 Log.Information("Application is starting..."); // Test log entry
 
 builder.Host.UseSerilog();
+
 
 builder.Services.AddRateLimiter(option =>
 {
     option.AddFixedWindowLimiter(policyName: "StaticControllerRateLimiter", windowsOptions =>
     {
         windowsOptions.PermitLimit = 3;
-        windowsOptions.Window = TimeSpan.FromSeconds(10);
+        windowsOptions.Window = TimeSpan.FromSeconds(10); //For testing
     });
 
     option.AddFixedWindowLimiter(policyName: "AuthControllerRateLimit", windowsOptions =>
@@ -107,6 +108,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Name = "YourAppCookie";
 });
 
+builder.Services.AddFluentValidationAutoValidation().AddValidatorsFromAssemblyContaining<AuthValidator>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -115,15 +117,9 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     })
     .AddNewtonsoftJson(options =>
-
     {
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
-
-
-
-
-builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 
@@ -137,9 +133,7 @@ app.UseSerilogRequestLogging();
 
 app.UseHttpsRedirection();
 
-
 app.UseRouting();
-
 
 app.UseAuthentication();
 app.UseAuthorization();

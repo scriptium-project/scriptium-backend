@@ -11,7 +11,6 @@ using writings_backend_dotnet.Models.Util;
 
 namespace writings_backend_dotnet.Controllers.LikeHandler
 {
-    //TODO: Amend
     [ApiController, Route("like"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class LikeController(ApplicationDBContext db, UserManager<User> userManager, ILogger<LikeController> logger) : ControllerBase
     {

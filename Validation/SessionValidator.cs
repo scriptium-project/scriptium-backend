@@ -10,10 +10,13 @@ namespace writings_backend_dotnet.Controllers.Validation
         public string? Biography { get; set; }
         public string? Gender { get; set; }
         public byte? LanguageId { get; set; }
+        public IFormFile? Image { get; set; }
     }
 
     public class UpdateProfileValidator : AbstractValidator<UpdateProfileModel>
     {
+        private readonly long _maxFileSize = 4 * 1024 * 1024; //4MB
+
         public UpdateProfileValidator()
         {
             RuleFor(x => x.Name)
@@ -41,6 +44,13 @@ namespace writings_backend_dotnet.Controllers.Validation
             RuleFor(x => x.LanguageId)
                 .GreaterThanOrEqualTo((byte)1).WithMessage("Language ID must be a valid positive number.")
                 .When(x => x.LanguageId.HasValue);
+
+            When(r => r.Image != null, () =>
+               {
+                   RuleFor(r => r.Image)
+                       .Must(File => File != null && Path.GetExtension(File.FileName).Equals(".jpeg", StringComparison.InvariantCultureIgnoreCase)).WithMessage("Only jpeg files are allowed.")
+                       .Must(File => File != null && File.Length <= _maxFileSize).WithMessage($"Image size must be less than {_maxFileSize / (1024 * 1024)} MB.");
+               });
         }
     }
     public class ChangePasswordModel

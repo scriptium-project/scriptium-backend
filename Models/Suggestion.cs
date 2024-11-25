@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace writings_backend_dotnet.Models
 {
@@ -12,7 +13,7 @@ namespace writings_backend_dotnet.Models
         [Required]
         public Guid UserId { get; set; }
 
-        [Required]
+        [Required, ForeignKey("TranslationText")]
         public long TranslationTextId { get; set; }
 
         [Required]

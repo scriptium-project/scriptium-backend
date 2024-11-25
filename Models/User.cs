@@ -15,7 +15,7 @@ namespace writings_backend_dotnet.Models
         [Required, MaxLength(30)]
         public string Surname { get; set; } = null!;
 
-        public byte[] Image { get; set; } = null!; //TODO: Will be implemented
+        public byte[] Image { get; set; } = null!;
 
         [MaxLength(1)]
         public string? Gender { get; set; }

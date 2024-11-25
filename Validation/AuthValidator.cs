@@ -1,4 +1,5 @@
 using FluentValidation;
+using SixLabors.ImageSharp;
 
 namespace writings_backend_dotnet.Controllers.Validation
 {
@@ -15,10 +16,14 @@ namespace writings_backend_dotnet.Controllers.Validation
         public string? Surname { get; set; }
 
         public string? Gender { get; set; }
+        public IFormFile? Image { get; set; }
     }
-
     public class AuthValidator : AbstractValidator<RegisterModel>
     {
+        private readonly long _maxFileSize = 4 * 1024 * 1024; //4MB
+        private readonly long _requiredHeight = 800;
+        private readonly long _requiredWidth = 800;
+
         public AuthValidator()
         {
             RuleFor(r => r.Username)
@@ -45,26 +50,52 @@ namespace writings_backend_dotnet.Controllers.Validation
                 .MaximumLength(1).WithMessage("Gender must be a single character.")
                 .Must(g => string.IsNullOrEmpty(g) || g == "M" || g == "F" || g == "O")
                 .WithMessage("Invalid gender. Allowed values are 'M', 'F', or 'O'.");
+
+            RuleFor(r => r.Image)
+                              .Must(File => File != null && Path.GetExtension(File.FileName).Equals(".jpeg", StringComparison.InvariantCultureIgnoreCase)).WithMessage("Only jpeg files are allowed.")
+                              .Must(File => File != null && File.Length <= _maxFileSize).WithMessage($"Image size must be less than {_maxFileSize / (1024 * 1024)} MB.")
+                              .Must(IsValidImage).WithMessage($"Image must be {_requiredWidth}x{_requiredHeight} pixels and square.");
+
         }
 
-        public class LoginModel
+        private bool IsValidImage(IFormFile? File)
         {
-            public string Username { get; set; } = null!;
-            public string Password { get; set; } = null!;
-        }
 
-        public class LoginValidator : AbstractValidator<LoginModel>
-        {
-            public LoginValidator()
+            if (File == null)
+                return false;
+
+            try
             {
-                RuleFor(l => l.Username)
-                    .NotEmpty().WithMessage("Username is required.")
-                    .MaximumLength(16).WithMessage("Username cannot exceed 16 characters.");
+                using var stream = File.OpenReadStream();
+                using var image = Image.Load(stream);
 
-                RuleFor(l => l.Password)
-                    .NotEmpty().WithMessage("Password is required.")
-                    .MaximumLength(16).WithMessage("Username cannot exceed 16 characters.");
+                return image.Width == image.Height && image.Width == _requiredWidth; //&& image.Height == _requiredHeight; Should be square.
+            }
+            catch
+            {
+                return false;
             }
         }
     }
+
+    public class LoginModel
+    {
+        public string Username { get; set; } = null!;
+        public string Password { get; set; } = null!;
+    }
+
+    public class LoginValidator : AbstractValidator<LoginModel>
+    {
+        public LoginValidator()
+        {
+            RuleFor(l => l.Username)
+                .NotEmpty().WithMessage("Username is required.")
+                .MaximumLength(16).WithMessage("Username cannot exceed 16 characters.");
+
+            RuleFor(l => l.Password)
+                .NotEmpty().WithMessage("Password is required.")
+                .MaximumLength(16).WithMessage("Username cannot exceed 16 characters.");
+        }
+    }
 }
+

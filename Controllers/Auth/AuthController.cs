@@ -7,6 +7,7 @@ using writings_backend_dotnet.Controllers.Validation;
 using static writings_backend_dotnet.Controllers.Validation.AuthValidator;
 using writings_backend_dotnet.DB;
 using writings_backend_dotnet.Models.Util;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace writings_backend_dotnet.Controllers.AuthHandler
 {
@@ -41,7 +42,7 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
     ///     </item>
     /// </list>
     /// </remarks>
-    [ApiController, Route("auth")]
+    [ApiController, Route("auth"), EnableRateLimiting("AuthControllerRateLimit")]
     public class AuthController(ApplicationDBContext db, UserManager<User> userManager, SignInManager<User> signInManager, ILogger<AuthController> logger) : ControllerBase
     {
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
@@ -61,7 +62,7 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
         /// - 400 Bad Request if the conditions did NOT meet. Returns the reasons.
         /// </returns>
         [HttpPost, Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register([FromForm] RegisterModel model)
         {
             _logger.LogInformation($"An registration process began.");
 
@@ -72,6 +73,13 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
                 Name = model.Name,
                 Surname = model.Surname ?? null!
             };
+
+            if (model.Image != null)
+            {
+                using var memoryStream = new MemoryStream();
+                await model.Image.CopyToAsync(memoryStream);
+                user.Image = memoryStream.ToArray();
+            }
 
             var Result = await _userManager.CreateAsync(user, model.Password);
 
@@ -106,9 +114,11 @@ namespace writings_backend_dotnet.Controllers.AuthHandler
             {
                 _logger.LogInformation($"Registration failed: Duplicated Email tried to be created. Duplicated Email: {user.Email} Username: {user.UserName}");
                 return BadRequest(new { Message = "Email already exists." });
-
             }
-            _logger.LogInformation($"Registration failed: Errors occurred: {Result.Errors}");
+
+            foreach (IdentityError error in Result.Errors)
+                _logger.LogWarning($"Registration failed: {error.Code} - {error.Description}");
+
             return BadRequest(Result.Errors);
         }
 

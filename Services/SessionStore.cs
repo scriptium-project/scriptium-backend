@@ -19,7 +19,6 @@ namespace writings_backend_dotnet.Services
             _logger.LogInformation("StoreAsync called to create a new session.");
 
             var userIdClaim = ticket.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            Console.WriteLine("UserId Claim " + userIdClaim);
             if (string.IsNullOrEmpty(userIdClaim))
             {
                 _logger.LogError("StoreAsync failed: UserId claim not found in the authentication ticket.");
@@ -109,7 +108,8 @@ namespace writings_backend_dotnet.Services
                     return null;
                 }
 
-                var user = await _db.Users.FindAsync(session.UserId);
+                User? user = await _db.Users.FindAsync(session.UserId);
+
                 if (user == null)
                 {
                     _logger.LogWarning($"RetrieveAsync: UserId: {session.UserId} associated with SessionId: {key} not found.");
@@ -120,7 +120,7 @@ namespace writings_backend_dotnet.Services
                 {
                     new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new(ClaimTypes.Name, user.Id.ToString()),
-                    new(ClaimTypes.UserData, user?.UserName ?? "\\0"),
+                    new(ClaimTypes.UserData, user.UserName ?? "\\0"),
                 };
 
                 var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
@@ -135,6 +135,10 @@ namespace writings_backend_dotnet.Services
 
                 var ticket = new AuthenticationTicket(principal, props, IdentityConstants.ApplicationScheme);
                 _logger.LogInformation($"RetrieveAsync: Authentication ticket created for SessionId: {key}.");
+
+                user.LastActive = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+                _logger.LogInformation($"User: [Id: {user.Id}, Username: {user.UserName}]'s last active property has been updated..");
 
                 return ticket;
             }
