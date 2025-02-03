@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.Controllers.Validation;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Controllers.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.DTOs;
+using scriptium_backend_dotnet.Models;
+using static System.Collections.Specialized.BitVector32;
 
-namespace writings_backend_dotnet.Controllers.CollectionHandler
+namespace scriptium_backend_dotnet.Controllers.CollectionHandler
 {
 
     [ApiController, Route("collection"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
@@ -31,11 +33,158 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            List<Collection> data = await _db.Collection.Where(c => c.UserId == UserRequested.Id).ToListAsync();
+            List<CollectionDTO> data = await _db.Collection.Where(c => c.UserId == UserRequested.Id).Select(c => new CollectionDTO
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Description = c.Description,
+                SaveCount = c.Verses != null ? c.Verses.Count : 0
+            }).ToListAsync();
 
             _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his collection records. {data.Count} row has ben returned.");
+
+            return Ok(new { data });
+
+        }
+        [HttpGet, Route("{CollectionId}")]
+        public async Task<IActionResult> GetCollectionVerses([FromRoute] int CollectionId, [FromQuery] int Page = 1)
+        {
+
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (UserId == null)
+                return Unauthorized();
+
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
+                return NotFound(new { message = "User not found." });
+
+            Collection? collection = await _db.Collection
+                .FirstOrDefaultAsync(c => c.Id == CollectionId && c.UserId == UserRequested.Id);
+
+            if (collection == null)
+            {
+                _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get verses from a non-existing or unauthorized Collection: [Id: {CollectionId}]");
+                return NotFound(new { message = "Collection not found or unauthorized." });
+            }
+
+            int Total = await _db.CollectionVerse
+                .CountAsync(cv => cv.CollectionId == CollectionId);
+
+            int Limit = 30;
+            int Skip = (Page - 1) * Limit;
+
+            List<VerseCollectionDTO> data = await _db.CollectionVerse
+                .Where(cv => cv.CollectionId == CollectionId)
+                .OrderBy(cv => cv.Id)
+                .Skip(Skip)
+                .Take(Limit)
+                .Select(cv => cv.Verse)
+                .Select(verse => new VerseCollectionDTO
+                {
+                    Id = verse.Id,
+                    Number = verse.Number,
+                    Text = verse.Text,
+                    TextWithoutVowel = verse.TextWithoutVowel,
+                    TextSimplified = verse.TextSimplified,
+                    Transliterations = verse.Transliterations.Select(e => e.ToTransliterationDTO()).ToList(),
+                    ChapterNumber = verse.Chapter.Number,
+                    Section = new SectionDTO
+                    {
+                        Name = verse.Chapter.Section.Name,
+                        Number = verse.Chapter.Section.Number,
+                        Scripture = new ScriptureConfinedDTO
+                        {
+                            Name = verse.Chapter.Section.Scripture.Name,
+                            Code = verse.Chapter.Section.Scripture.Code,
+                            Number = verse.Chapter.Section.Scripture.Number,
+                            Meanings = verse.Chapter.Section.Scripture.Meanings.Select(scriptureMeaning => new ScriptureMeaningDTO
+                            {
+                                Meaning = scriptureMeaning.Meaning,
+                                Language = new LanguageDTO
+                                {
+                                    LangCode = scriptureMeaning.Language.LangCode,
+                                    LangOwn = scriptureMeaning.Language.LangOwn,
+                                    LangEnglish = scriptureMeaning.Language.LangEnglish
+                                }
+                            }).ToList()
+                        },
+                        Meanings = verse.Chapter.Section.Meanings.Select(sectionMeaning => new SectionMeaningDTO
+                        {
+                            Meaning = sectionMeaning.Meaning,
+                            Language = new LanguageDTO
+                            {
+                                LangCode = sectionMeaning.Language.LangCode,
+                                LangOwn = sectionMeaning.Language.LangOwn,
+                                LangEnglish = sectionMeaning.Language.LangEnglish
+                            }
+                        }).ToList()
+                    },
+                    Translations = verse.Chapter.Section.Scripture.Translations.Select(translation => new TranslationWithSingleTextDTO
+                    {
+                        Translation = new TranslationDTO
+                        {
+                            Id = translation.Id,
+                            Name = translation.Name,
+                            Language = new LanguageDTO
+                            {
+                                LangCode = translation.Language.LangCode,
+                                LangOwn = translation.Language.LangOwn,
+                                LangEnglish = translation.Language.LangEnglish
+                            },
+                            Translators = translation.TranslatorTranslations.Select(translatorTranslation => new TranslatorDTO
+                            {
+                                Name = translatorTranslation.Translator.Name,
+                                URL = translatorTranslation.Translator.Url,
+                                Language = new LanguageDTO
+                                {
+                                    LangCode = translatorTranslation.Translator.Language.LangCode,
+                                    LangOwn = translatorTranslation.Translator.Language.LangOwn,
+                                    LangEnglish = translatorTranslation.Translator.Language.LangEnglish
+                                }
+                            }).ToList(),
+                            IsEager = translation.EagerFrom.HasValue
+                        },
+                        TranslationText = translation.TranslationTexts.Where(tx => tx.Verse.Id == verse.Id).Select(tx => new TranslationTextSimpleDTO
+                        {
+                            FootNotes = tx.FootNotes.Select(ftn => new FootNoteDTO { Index = ftn.Index, Text = ftn.FootNoteText.Text }).ToList(),
+                            Text = tx.Text
+                        }).First(),
+                    }).ToList(),
+                }).ToListAsync();
+
+
+            _logger.LogInformation($@"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded collection verses from Collection [Id: {CollectionId}]. {data.Count} row has been returned for page: {Page}.");
+
+
+            return Ok(new { data });
+        }
+
+
+        [HttpGet, Route("verse/{VerseId}")]
+        public async Task<IActionResult> GetCollections([FromRoute] int VerseId)
+        {
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (UserId == null)
+                return Unauthorized();
+
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
+                return NotFound(new { message = "User not found." });
+
+            List<CollectionWithVerseSavedInformationDTO> data = await _db.Collection.Where(c => c.UserId == UserRequested.Id).Select(c => new CollectionWithVerseSavedInformationDTO
+            {
+                Name = c.Name,
+                Description = c.Description,
+                IsSaved = _db.CollectionVerse.Any(cv => cv.Collection.UserId == UserRequested.Id && cv.CollectionId == c.Id && cv.VerseId == VerseId)
+            }).ToListAsync();
+
+            _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his simple collection records. {data.Count} row has ben returned.");
 
             return Ok(new { data });
 
@@ -52,35 +201,48 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            if (UserRequested.Collections?.Any(c => c.Name == model.CollectionName) ?? false)
-            {
-                _logger.LogWarning($"Conflict occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has tried to create a Collection named: {model.CollectionName}, User has a collection with same name.");
 
-                return Conflict("You have already the collection with same name.");
-            }
-
-            Collection CollectionCreated = new()
-            {
-                Name = model.CollectionName,
-                Description = model.Description,
-                UserId = UserRequested.Id
-            };
-
-            _db.Collection.Add(CollectionCreated);
-
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
+
+                if (UserRequested.Collections?.Any(c => c.Name == model.CollectionName) ?? false)
+                {
+                    _logger.LogWarning($"Conflict occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has tried to create a Collection named: {model.CollectionName}, User has a collection with same name.");
+
+                    return Conflict(new { message = "You have already the collection with same name." });
+                }
+
+                int CollectionCount = await _db.Collection.CountAsync(c => c.UserId == UserRequested.Id);
+
+                if (CollectionCount > Utility.MAX_COLLECTION_COUNT)
+                    return Unauthorized(new { message = "You cannot have more collections." });
+
+                Collection CollectionCreated = new()
+                {
+
+                    Name = model.CollectionName,
+                    Description = model.Description,
+                    UserId = UserRequested.Id
+
+                };
+
+                _db.Collection.Add(CollectionCreated);
+
                 await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
 
                 _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has created a Collection: [Id: {CollectionCreated.Id}, CollectionName: {CollectionCreated.Name}]");
-                return Ok(new { Message = "Collection is successfully created!" });
+                return Ok(new { message = "Collection is successfully created!" });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has tried to create the collection. Collection: [Id: {CollectionCreated.Id}, CollectionName: {CollectionCreated.Name}], Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                await transaction.RollbackAsync();
+
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has tried to create the collection. Collection: [CollectionName: {model.CollectionName}], Error Details: {ex}");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -96,35 +258,59 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Collection? CollectionUpdated = null!;
 
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
 
-                CollectionUpdated = await _db.Collection.FirstOrDefaultAsync(c => c.Name == model.OldCollectionName && c.UserId == UserRequested.Id);
+
+
+                Collection? CollectionUpdated = await _db.Collection.FirstOrDefaultAsync(c => c.Id == model.CollectionId && c.UserId == UserRequested.Id);
 
                 if (CollectionUpdated == null)
                 {
-                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to update Non-existing Collection: [model.OldCollectionName: {model.OldCollectionName}] model.NewCollectionName: {model.NewCollectionName}");
-                    return NotFound(new { Message = "There is no collection with this name." });
+                    await transaction.DisposeAsync();
+
+                    _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to update Non-existing Collection: [model.CollectionId: {model.CollectionId}] model.NewCollectionName: {model.NewCollectionName}");
+                    return NotFound(new { message = "There is no collection with this name." });
                 }
 
-                CollectionUpdated.Name = model.NewCollectionName;
-                CollectionUpdated.Description = model.NewDescription;
+
+                if (model.NewCollectionName != null)
+                {
+
+                    int collectionCount = await _db.Collection.CountAsync(c => c.UserId == UserRequested.Id && c.Name == model.NewCollectionName);
+
+                    if (collectionCount != 0)
+                    {
+                        await transaction.DisposeAsync();
+
+                        return Conflict(new { message = "You have already the collection with same name." });
+                    }
+
+                    CollectionUpdated.Name = model.NewCollectionName;
+
+                }
+
+                if (model.NewCollectionDescription != null)
+                    CollectionUpdated.Description = model.NewCollectionDescription;
 
                 _db.Collection.Update(CollectionUpdated);
 
-
                 await _db.SaveChangesAsync();
-                _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has changed his collection named: {model.OldCollectionName} to {CollectionUpdated.Name}");
-                return Ok(new { Message = "Collection is successfully updated!" });
+                await transaction.CommitAsync();
+
+                _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has changed his collection with id: {model.CollectionId} to {model.NewCollectionName} and description to {model.NewCollectionDescription}");
+                return Ok(new { message = "Collection is successfully updated!" });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has tried to create the collection. Collection: [Id: {CollectionUpdated?.Id}, CollectionName: {CollectionUpdated?.Name}], Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                await transaction.RollbackAsync();
+
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has tried to create the collection. Collection: [Id: {model.CollectionId}], Error Details: {ex}");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -140,18 +326,18 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Collection? CollectionDeleted = null;
 
             try
             {
-                await _db.Collection.FirstOrDefaultAsync(c => c.Name == model.CollectionName && c.UserId == UserRequested.Id);
+                Collection? CollectionDeleted = await _db.Collection.FirstOrDefaultAsync(c => c.Id == model.CollectionId && c.UserId == UserRequested.Id);
 
                 if (CollectionDeleted == null)
                 {
-                    _logger.LogWarning($"Not Found, while. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to delete Collection : [model.CollectionName: {model.CollectionName}]");
-                    return NotFound(new { Message = "This collection might be already deleted or never been exist." });
+
+                    _logger.LogWarning($"Not Found, while. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to delete Collection : [model.CollectionId: {model.CollectionId}]");
+                    return NotFound(new { message = "This collection might be already deleted or never been exist." });
                 }
 
                 _db.Collection.Remove(CollectionDeleted);
@@ -159,13 +345,13 @@ namespace writings_backend_dotnet.Controllers.CollectionHandler
 
                 _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has deleted his Collection: [Id: {CollectionDeleted.Id}, CollectionName: {CollectionDeleted.Name}]");
 
-                return Ok(new { Message = "Collection is successfully deleted!" });
+                return Ok(new { message = "Collection is successfully deleted!" });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to delete his Collection: [Id: {CollectionDeleted?.Id}, CollectionName: {CollectionDeleted?.Name}]. Error Details: {ex}");
+                _logger.LogError($"Error occurred, while. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to delete his Collection: [CollectionId: {model.CollectionId}]. Error Details: {ex}");
 
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }

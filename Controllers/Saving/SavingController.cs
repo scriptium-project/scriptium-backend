@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.Controllers.Validation;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.DTOs;
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Controllers.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.DTOs;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.Controllers.SavingHandler
+namespace scriptium_backend_dotnet.Controllers.SavingHandler
 {
     [ApiController, Route("saving"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class SavingController(ApplicationDBContext db, UserManager<User> userManager, ILogger<SavingController> logger) : ControllerBase
@@ -31,12 +31,12 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Verse? VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Number == model.Verse.VerseNumber && v.Chapter.Number == model.Verse.ChapterNumber && v.Chapter.Section.Number == model.Verse.SectionNumber && v.Chapter.Section.Scripture.Number == model.Verse.ScriptureNumber);
+            Verse? VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Id == model.VerseId);
 
             if (VerseAttached == null)
-                return NotFound(new { Message = "Verse not found." });
+                return NotFound(new { message = "Verse not found." });
 
 
             //This lists will indicate users which insertion has been succeed or failed.
@@ -121,12 +121,12 @@ namespace writings_backend_dotnet.Controllers.SavingHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Verse? VerseRemoved = await _db.Verse.FirstOrDefaultAsync(v => v.Number == model.Verse.VerseNumber && v.Chapter.Number == model.Verse.ChapterNumber && v.Chapter.Section.Number == model.Verse.SectionNumber && v.Chapter.Section.Scripture.Number == model.Verse.ScriptureNumber);
+            Verse? VerseRemoved = await _db.Verse.FirstOrDefaultAsync(v => v.Id == model.VerseId);
 
             if (VerseRemoved == null)
-                return NotFound(new { Message = "Verse not found." });
+                return NotFound(new { message = "Verse not found." });
 
             //This lists will indicate users which insertion has been succeed or failed.
             List<CollectionProcessResultDTO> succeed = [];

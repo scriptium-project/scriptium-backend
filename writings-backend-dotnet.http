@@ -1,6 +1,0 @@
-@writings_backend_dotnet_HostAddress = http://localhost:5277
-
-GET {{writings_backend_dotnet_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace writings_backend_dotnet.Validation
+namespace scriptium_backend_dotnet.Validation
 {
     public class SuggestionCreateModel
     {

@@ -1,14 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class Scripture
     {
         [Key, Column("id", TypeName = Utility.DBType8bitInteger)]
         public byte Id { get; set; }
 
-        [Required, Column(TypeName = Utility.DBTypeVARCHAR50), MaxLength(50)]
+        [Required, Column(TypeName = Utility.DBTypeNVARCHAR255), MaxLength(50)]
         public required string Name { get; set; }
 
         [Column(TypeName = Utility.DBTypeCHAR1), MaxLength(1), Required]
@@ -25,5 +25,8 @@ namespace writings_backend_dotnet.Models
         public virtual List<Section> Sections { get; set; } = [];
 
         public virtual List<Root> Roots { get; set; } = [];
+
+        public virtual List<Translation> Translations { get; set; } = [];
+
     }
 }

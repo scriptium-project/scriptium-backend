@@ -1,23 +1,23 @@
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.DTOs
+namespace scriptium_backend_dotnet.DTOs
 {
-    public class TranslatorSimpleDTO
+    public class TranslatorDTO
     {
         public required string Name { get; set; }
         public string? URL { get; set; }
-        public required LanguageSimpleDTO Language { get; set; }
+        public required LanguageDTO Language { get; set; }
     }
 
     public static class TranslatorExtensions
     {
-        public static TranslatorSimpleDTO ToTranslatorSimpleDTO(this Translator translator)
+        public static TranslatorDTO ToTranslatorDTO(this Translator translator)
         {
-            return new TranslatorSimpleDTO
+            return new TranslatorDTO
             {
                 Name = translator.Name,
                 URL = translator.Url,
-                Language = translator.Language.ToLanguageSimpleDTO()
+                Language = translator.Language.ToLanguageDTO()
             };
         }
     }

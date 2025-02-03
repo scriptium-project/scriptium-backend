@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.Controllers.NotificationHandler
+namespace scriptium_backend_dotnet.Controllers.NotificationHandler
 {
 
     [ApiController, Route("notification"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
@@ -28,7 +28,7 @@ namespace writings_backend_dotnet.Controllers.NotificationHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
             List<Notification> data;
             try
@@ -50,7 +50,7 @@ namespace writings_backend_dotnet.Controllers.NotificationHandler
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get notification records. Error details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
 
@@ -65,7 +65,7 @@ namespace writings_backend_dotnet.Controllers.NotificationHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
             try
             {
@@ -76,13 +76,13 @@ namespace writings_backend_dotnet.Controllers.NotificationHandler
 
                 await _db.SaveChangesAsync();
                 _logger.LogInformation($"Operation completed: User: [Id {UserRequested.Id}, Username: {UserRequested.UserName}] has read {Notifications.Count} notifications.");
-                return Ok(new { Message = "Successfully have read!" });
+                return Ok(new { message = "Successfully have read!" });
 
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id {UserRequested.Id}, Username: {UserRequested.UserName}] trying to read his notifications. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }

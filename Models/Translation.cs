@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class Translation
     {
         [Key, Column("id", TypeName = Utility.DBType16bitInteger)]
-        public short Id { get; set; }
+        public required short Id { get; set; }
 
         [Required, Column("name", TypeName = Utility.DBTypeVARCHAR250), MaxLength(300)]
         public required string Name { get; set; }
@@ -24,6 +24,11 @@ namespace writings_backend_dotnet.Models
         public byte LanguageId { get; set; } = 1;
 
         public virtual Language Language { get; set; } = null!;
+
+        [Required, ForeignKey("Scripture"), Column("scripture_id", TypeName = Utility.DBType8bitInteger)]
+        public byte ScriptureId { get; set; } = 1;
+
+        public virtual Scripture Scripture { get; set; } = null!;
 
         public virtual List<TranslatorTranslation> TranslatorTranslations { get; set; } = [];
 

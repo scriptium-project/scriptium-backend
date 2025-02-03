@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.Models;
+using scriptium_backend_dotnet.Validation;
 
-namespace writings_backend_dotnet.Controllers.SuggestionHandler
+namespace scriptium_backend_dotnet.Controllers.SuggestionHandler
 {
 
     [ApiController, Route("suggestion"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
@@ -35,17 +35,17 @@ namespace writings_backend_dotnet.Controllers.SuggestionHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
-            TranslationText? TranslationTextBeAttached = null;
+                return NotFound(new { message = "User not found." });
+
             try
             {
 
-                TranslationTextBeAttached = await _db.TranslationText.FirstOrDefaultAsync(tt => tt.Id == model.TranslationTextId && tt.Translation.EagerFrom.HasValue);
+                TranslationText? TranslationTextBeAttached = await _db.TranslationText.FirstOrDefaultAsync(tt => tt.Id == model.TranslationTextId && tt.Translation.EagerFrom.HasValue);
 
                 if (TranslationTextBeAttached == null)
                 {
                     _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] tried to create a suggestion on non-exist TranslationText");
-                    return NotFound(new { Message = "Translation is not found." });
+                    return NotFound(new { message = "Translation is not found." });
                 }
 
                 Suggestion? ExistingSuggestion = await _db.Suggestion.FirstOrDefaultAsync(s => s.UserId == UserRequested.Id && s.TranslationTextId == TranslationTextBeAttached.Id);
@@ -53,7 +53,7 @@ namespace writings_backend_dotnet.Controllers.SuggestionHandler
                 if (ExistingSuggestion != null)
                 {
                     _logger.LogWarning($"Conflict occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] tried to create another suggestion on TranslationText: [Id: {TranslationTextBeAttached.Id}]");
-                    return Conflict(new { Message = "There is already a Suggestion belongs to you attached this Translation" });
+                    return Conflict(new { message = "There is already a Suggestion belongs to you attached this Translation" });
 
                 }
                 Suggestion SuggestionCreated = new()
@@ -65,12 +65,12 @@ namespace writings_backend_dotnet.Controllers.SuggestionHandler
 
                 await _db.SaveChangesAsync();
                 _logger.LogInformation($"Operation completed: From User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] the saved Suggestion: [Id: {SuggestionCreated.Id}]");
-                return Ok(new { Message = "The suggestion is successfully attached." });
+                return Ok(new { message = "The suggestion is successfully attached." });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create a suggestion on TranslationText: [Id: {TranslationTextBeAttached?.Id}] Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                _logger.LogError($"Error occurred, while: User: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to create a suggestion on TranslationText: [Id: {model.TranslationTextId}] Error Details: {ex}");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -86,19 +86,18 @@ namespace writings_backend_dotnet.Controllers.SuggestionHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            TranslationText? TranslationTextBeDeAttached = null;
             try
             {
-                TranslationTextBeDeAttached = await _db.TranslationText.FirstOrDefaultAsync(tt => tt.Id == model.TranslationTextId && tt.Translation.EagerFrom.HasValue);
+                TranslationText? TranslationTextBeDeAttached = await _db.TranslationText.FirstOrDefaultAsync(tt => tt.Id == model.TranslationTextId && tt.Translation.EagerFrom.HasValue);
 
                 if (TranslationTextBeDeAttached == null)
                 {
                     _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] tried to remove a suggestion on non-exist TranslationText");
 
 
-                    return NotFound(new { Message = "Translation is not found." });
+                    return NotFound(new { message = "Translation is not found." });
                 }
 
 
@@ -108,7 +107,7 @@ namespace writings_backend_dotnet.Controllers.SuggestionHandler
                 if (SuggestionDeleted == null)
                 {
                     _logger.LogWarning($"Conflict occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] tried to remove non-exist suggestion on TranslationText: [Id: {TranslationTextBeDeAttached.Id}]");
-                    return NotFound(new { Message = "There is no a Suggestion belongs to you attached this Translation" });
+                    return NotFound(new { message = "There is no a Suggestion belongs to you attached this Translation" });
                 }
 
                 _db.Suggestion.Remove(SuggestionDeleted);
@@ -118,12 +117,12 @@ namespace writings_backend_dotnet.Controllers.SuggestionHandler
 
                 _logger.LogInformation($"Operation completed: From User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] the removed Suggestion: [Id: {SuggestionDeleted.Id}]");
 
-                return Ok(new { Message = "The suggestion is successfully removed." });
+                return Ok(new { message = "The suggestion is successfully removed." });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to remove a suggestion on TranslationText: [Id: {TranslationTextBeDeAttached?.Id}] Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                _logger.LogError($"Error occurred, while: User: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to remove a suggestion on TranslationText: [Id: {model.TranslationTextId}] Error Details: {ex}");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
     }

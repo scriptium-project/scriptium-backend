@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class Verse
     {
@@ -13,14 +13,14 @@ namespace writings_backend_dotnet.Models
         [Required, Column("number", TypeName = Utility.DBType16bitInteger)]
         public required short Number { get; set; }
 
-        [Required, Column("text", TypeName = Utility.DBTypeVARCHARMAX)]
+        [Required, Column("text", TypeName = Utility.DBTypeNVARCHARMAX)]
         public required string Text { get; set; }
 
-        [Column("text", TypeName = Utility.DBTypeVARCHARMAX)]
-        public required string TextWithoutVowel { get; set; }
+        [Column("text", TypeName = Utility.DBTypeNVARCHARMAX)]
+        public string? TextWithoutVowel { get; set; }
 
-        [Column("text", TypeName = Utility.DBTypeVARCHARMAX)]
-        public string TextSimplified { get; set; } = null!;
+        [Column("text", TypeName = Utility.DBTypeNVARCHARMAX)]
+        public string? TextSimplified { get; set; }
 
         [Required, Column("chapter_id", TypeName = Utility.DBType16bitInteger)]
         public short ChapterId { get; set; }

@@ -1,14 +1,14 @@
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.DTOs
+namespace scriptium_backend_dotnet.DTOs
 {
-    public class WordSimpleDTO
+    public class WordConfinedDTO
     {
         public required short SequenceNumber { get; set; }
         public required string Text { get; set; }
         public string? TextWithoutVowel { get; set; }
         public string? TextSimplified { get; set; }
-        public RootSimpleDTO? Root { get; set; }
+        public List<RootSimpleDTO>? Roots { get; set; }
     }
 
     public class WordRootDTO
@@ -17,21 +17,21 @@ namespace writings_backend_dotnet.DTOs
         public required string Text { get; set; }
         public string? TextWithoutVowel { get; set; }
         public string? TextSimplified { get; set; }
-        public VerseSimpleDTO Verse { get; set; } = null!;
+        public VerseDTO Verse { get; set; } = null!;
     }
 
 
     public static class WordExtensions
     {
-        public static WordSimpleDTO ToWordSimpleDTO(this Word word)
+        public static WordConfinedDTO ToWordConfinedDTO(this Word word)
         {
-            return new WordSimpleDTO
+            return new WordConfinedDTO
             {
                 SequenceNumber = word.SequenceNumber,
                 Text = word.Text,
                 TextWithoutVowel = word.TextWithoutVowel,
                 TextSimplified = word.TextSimplified,
-                Root = word.Root?.ToRootSimpleDTO() ?? null
+                Roots = word.Roots?.Select(r => r.ToRootSimpleDTO()).ToList() ?? null
             };
         }
 
@@ -43,7 +43,7 @@ namespace writings_backend_dotnet.DTOs
                 Text = word.Text,
                 TextWithoutVowel = word.TextWithoutVowel,
                 TextSimplified = word.TextSimplified,
-                Verse = word.Verse.ToVerseSimpleDTO()
+                Verse = word.Verse.ToVerseDTO()
             };
         }
     }

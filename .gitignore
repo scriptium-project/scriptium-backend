@@ -1,6 +1,7 @@
 bin
 obj
-
+.vs
+.github
 appsettings.Development.json
 appsettings.json
-
+Migrations/

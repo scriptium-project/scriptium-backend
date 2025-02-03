@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.Controllers.Validation;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.DTOs;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Services;
+using scriptium_backend_dotnet.Controllers.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.DTOs;
+using scriptium_backend_dotnet.Services;
 
-namespace writings_backend_dotnet.Controllers.RootHandler
+namespace scriptium_backend_dotnet.Controllers.RootHandler
 {
 
     [ApiController, Route("root"), EnableRateLimiting(policyName: "StaticControllerRateLimiter")]
@@ -19,36 +18,73 @@ namespace writings_backend_dotnet.Controllers.RootHandler
 
 
         [HttpGet("{ScriptureNumber}/{RootLatin}")]
-        public async Task<IActionResult> GetRoot([FromRoute] RootValidatedDTO dto)
+        public async Task<IActionResult> GetRoot([FromRoute] RootValidatedDTO model)
         {
-            RootExpandedDTO data;
-
             string requestPath = Request.Path.ToString();
 
-            RootExpandedDTO? cache = await _cacheService.GetCachedDataAsync<RootExpandedDTO>(requestPath);
-
-            if (cache != null)  //Checking cache
+            RootDTO? cache = await _cacheService.GetCachedDataAsync<RootDTO>(requestPath);
+            if (cache != null)
             {
                 _logger.LogInformation($"Cache data with URL {requestPath} is found. Sending.");
                 return Ok(new { data = cache });
             }
 
 
-            Root? root = await _db.Root.AsNoTracking()
-                                        .Include(r => r.Words).ThenInclude(w => w.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Section).ThenInclude(s => s.Scripture)
-                                        .AsSingleQuery() //With the purpose of prevent Cartesian explosion. Reference : https://learn.microsoft.com/en-us/ef/core/querying/single-split-queries
-                                        .Include(r => r.Words).ThenInclude(w => w.Verse)
-                                        .FirstOrDefaultAsync(r => r.Latin == dto.RootLatin && r.Scripture.Number == dto.ScriptureNumber);
+            RootDTO? data = await _db.Root
+                .Where(r => r.Scripture.Number == model.ScriptureNumber && r.Latin == model.RootLatin)
+                .AsNoTracking()
+                .IgnoreAutoIncludes()
+                .Include(r => r.Scripture)
+                    .ThenInclude(s => s.Translations)
+                        .ThenInclude(t => t.TranslatorTranslations)
+                            .ThenInclude(tt => tt.Translator)
+                                .ThenInclude(tr => tr.Language)
+                 .Include(r => r.Scripture)
+                    .ThenInclude(s => s.Translations)
+                        .ThenInclude(t => t.Language)
+                 .Include(r => r.Scripture)
+                    .ThenInclude(s => s.Translations)
+                        .ThenInclude(t => t.TranslationTexts)
+                            .ThenInclude(t => t.Verse)
+                .Include(r => r.Scripture)
+                    .ThenInclude(s => s.Translations)
+                        .ThenInclude(t => t.TranslationTexts)
+                            .ThenInclude(tt => tt.FootNotes)
+                                .ThenInclude(fn => fn.FootNoteText)
+                .Include(r => r.Words)
+                    .ThenInclude(w => w.Verse)
+                        .ThenInclude(v => v.Chapter)
+                .Include(r => r.Words)
+                    .ThenInclude(w => w.Verse)
+                        .ThenInclude(v => v.Transliterations)
+                            .ThenInclude(tr => tr.Language)
+                .Include(r => r.Words)
+                    .ThenInclude(w => w.Verse)
+                        .ThenInclude(v => v.Chapter)
+                            .ThenInclude(c => c.Meanings)
+                                .ThenInclude(m => m.Language)
+                 .Include(r => r.Words)
+                    .ThenInclude(w => w.Verse)
+                        .ThenInclude(v => v.Chapter)
+                            .ThenInclude(c => c.Section)
+                                .ThenInclude(s => s.Meanings)
+                                    .ThenInclude(m => m.Language)
+                .Include(r => r.Words)
+                    .ThenInclude(w => w.Verse)
+                        .ThenInclude(v => v.Chapter)
+                            .ThenInclude(c => c.Section)
+                                .ThenInclude(s => s.Scripture)
+                                    .ThenInclude(s => s.Meanings)
+                                        .ThenInclude(m => m.Language)
+                .AsSplitQuery()
+                .Select(r => r.ToRootDTO())
+                .FirstOrDefaultAsync();
 
-            if (root == null)
+            if (data == null)
                 return NotFound("There is no root matches with this information.");
-
-            data = root.ToRootExpandedDTO();
 
             await _cacheService.SetCacheDataAsync(requestPath, data);
             _logger.LogInformation($"Cache data for URL {requestPath} is renewing");
-
-
             return Ok(new { data });
         }
     }

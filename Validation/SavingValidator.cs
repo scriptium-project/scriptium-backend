@@ -1,10 +1,10 @@
 using FluentValidation;
 
-namespace writings_backend_dotnet.Controllers.Validation
+namespace scriptium_backend_dotnet.Controllers.Validation
 {
     public class SavingProcessModel
     {
-        public required VerseValidatedModel Verse { get; set; }
+        public required int VerseId { get; set; }
         public required List<string> CollectionNames { get; set; }
     }
 
@@ -12,16 +12,16 @@ namespace writings_backend_dotnet.Controllers.Validation
     {
         public SavingProcessModelValidator()
         {
-            RuleFor(r => r.Verse)
-                      .SetValidator(new VerseValidator());
+            RuleFor(r => r.VerseId).Must(v => v < int.MaxValue).WithMessage("VerseId should be valid.");
 
             RuleFor(r => r.CollectionNames)
             .Must(r => r.Count >= 1)
-            .WithMessage("You must specify at least one name of your collections.");
+            .WithMessage("You must specify at least one name of your collections.")
+            .Must(r => r.Count <= Utility.MAX_COLLECTION_COUNT)
+            .WithMessage($"You must specify at most {Utility.MAX_COLLECTION_COUNT} name of your collections.");
 
             RuleForEach(r => r.CollectionNames)
-                        .Must(name => name.Length < 100)
-                        .WithMessage("Each collection name must consist of less than 100 characters.");
+                        .CollectionNameRule();
 
         }
 

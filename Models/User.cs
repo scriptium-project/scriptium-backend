@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
+using scriptium_backend_dotnet.Models.Util;
 
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     [Table("user")]
     public class User : IdentityUser<Guid>
@@ -12,15 +13,15 @@ namespace writings_backend_dotnet.Models
         [Required, MaxLength(30)]
         public string Name { get; set; } = null!;
 
-        [Required, MaxLength(30)]
-        public string Surname { get; set; } = null!;
+        [MaxLength(30)]
+        public string? Surname { get; set; } = null!;
 
-        public byte[] Image { get; set; } = null!;
+        public byte[]? Image { get; set; } = null!;
 
         [MaxLength(1)]
         public string? Gender { get; set; }
 
-        [MaxLength(200)]
+        [MaxLength(256)]
         public string? Biography { get; set; }
 
         public DateTime? EmailVerified { get; set; }
@@ -31,7 +32,7 @@ namespace writings_backend_dotnet.Models
 
         public DateTime? IsFrozen { get; set; }
 
-        public DateTime? IsPrivate { get; set; }
+        public DateTime? IsPrivate { get; set; } = DateTime.UtcNow;
 
         [Column("preferred_languageId", TypeName = Utility.DBType8bitInteger)]
         public byte PreferredLanguageId { get; set; } = 1;
@@ -93,6 +94,11 @@ namespace writings_backend_dotnet.Models
 
         [NotMapped]
         public int SuggestionCount => Suggestions?.Count ?? 0;
+
+        public virtual List<UserUpdateR>? UpdateRecords { get; set; }
+
+        [NotMapped]
+        public int UpdateCount => UpdateRecords?.Count ?? 0;
 
     }
 }

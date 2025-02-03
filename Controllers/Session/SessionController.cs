@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.Controllers.Validation;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Controllers.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Controllers.SessionHandler
+namespace scriptium_backend_dotnet.Controllers.SessionHandler
 {
     [ApiController, Route("session"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class SessionController(ApplicationDBContext db, ILogger<SessionController> logger, SignInManager<User> signInManager, UserManager<User> userManager) : ControllerBase
@@ -41,7 +41,7 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
             return Ok(new { message = "Successfully logged out" });
         }
 
-        [HttpPost, Route("alter")]
+        [HttpPut, Route("alter")]
         public async Task<IActionResult> Alter()
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -56,6 +56,16 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
 
             bool IsPrivate = UserRequested.IsPrivate.HasValue;
 
+            if (IsPrivate)
+            {
+                List<Follow> FollowsAccepted = await _db.Follow.Where(f => f.FollowedId == UserRequested.Id && f.Status == FollowStatus.Pending).ToListAsync();
+
+                foreach (Follow follow in FollowsAccepted)
+                    follow.Status = FollowStatus.Accepted;
+
+                await _db.SaveChangesAsync();
+            }
+
             UserRequested.IsPrivate = IsPrivate ? null : DateTime.UtcNow;
             try
             {
@@ -69,12 +79,12 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id} Username: {UserRequested.UserName}] alter his account. Error Detail: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
 
         [HttpPost, Route("freeze"), EnableRateLimiting(policyName: "UpdateActionRateLimit")]
-        public async Task<IActionResult> Freeze()
+        public async Task<IActionResult> Freeze([FromBody] PasswordModel model)
         {
             FreezeR? FreezeRecord;
 
@@ -84,9 +94,13 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
                 return Unauthorized(new { message = "You are not logged in!" });
 
             User? UserRequested = await _userManager.FindByIdAsync(userId);
-
             if (UserRequested == null)
                 return NotFound(new { message = "Something went wrong!" });
+
+            bool isPasswordTrue = await _userManager.CheckPasswordAsync(UserRequested, model.Password);
+
+            if (!isPasswordTrue) return Unauthorized(new { message = "Invalid Credentials!" });
+
             try
             {
                 FreezeRecord = await _db.FreezeR.OrderByDescending(r => r.ProceedAt)
@@ -124,14 +138,32 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to freeze his account. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
 
         }
 
+        [HttpDelete, Route("delete"), EnableRateLimiting(policyName: "UpdateActionRateLimit")]
+        public async Task<IActionResult> Delete()
+        {
+
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+                return Unauthorized(new { message = "You are not logged in!" });
+
+            User? UserRequested = await _userManager.FindByIdAsync(userId);
+
+            if (UserRequested == null)
+                return NotFound(new { message = "Something went wrong!" });
+            return Ok();
+
+        }
+
+
         [HttpPut, Route("update")]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
+        public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileModel model)
         {
 
 
@@ -146,6 +178,11 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
                 return NotFound(new { message = "UserRequested not found!" });
 
             string UpdateLogRow = "";
+
+            UserUpdateR UpdateRecord = new()
+            {
+                UserId = UserRequested.Id
+            };
 
             if (!string.IsNullOrWhiteSpace(model.Username))
             {
@@ -170,46 +207,66 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
 
                 await model.Image.CopyToAsync(memoryStream);
 
-                UserRequested.Image = memoryStream.ToArray();
+                byte[] UpdatedImage = memoryStream.ToArray();
 
+                UserRequested.Image = UpdatedImage;
+                UpdateRecord.Image = UpdatedImage;
                 UpdateLogRow += $" Profile Image updated.";
             }
 
 
             if (!string.IsNullOrWhiteSpace(model.Name))
             {
-                UpdateLogRow += $" Name: {UserRequested.Name} -> {model.Name.Trim()}";
-                UserRequested.Name = model.Name.Trim();
+                string UpdatedName = model.Name.Trim();
+
+                UpdateLogRow += $" Name: {UserRequested.Name} -> {UpdatedName}";
+
+                UserRequested.Name = UpdatedName;
+                UpdateRecord.Name = UpdatedName;
             }
 
             if (!string.IsNullOrWhiteSpace(model.Surname))
             {
-                UpdateLogRow += $" Surname: {UserRequested.Surname} -> {model.Surname.Trim()}";
-                UserRequested.Surname = model.Surname.Trim();
+                string UpdatedSurname = model.Surname.Trim();
+
+                UpdateLogRow += $" Surname: {UserRequested.Surname} -> {UpdatedSurname}";
+                UserRequested.Surname = UpdatedSurname;
+                UpdateRecord.Surname = UpdatedSurname;
             }
 
             if (!string.IsNullOrWhiteSpace(model.Username))
             {
-                UpdateLogRow += $" UserName: {UserRequested.UserName} -> {model.Username.Trim()}";
-                UserRequested.UserName = model.Username.Trim();
+                string UpdatedUsername = model.Username.Trim();
+
+                UpdateLogRow += $" UserName: {UserRequested.UserName} -> {UpdatedUsername}";
+                UserRequested.UserName = UpdatedUsername;
+                UpdateRecord.Username = UpdatedUsername;
             }
 
-            if (!string.IsNullOrWhiteSpace(model.Biography))
-            {
-                UpdateLogRow += $" Biography: {UserRequested.Biography} -> {model.Biography.Trim()}";
-                UserRequested.Biography = model.Biography.Trim();
-            }
+            string UpdatedBiography = (model.Biography ?? "").Trim();
+
+            UpdateLogRow += $" Biography: {UserRequested.Biography} -> {UpdatedBiography}";
+            UserRequested.Biography = UpdatedBiography;
+            UpdateRecord.Biography = UpdatedBiography;
+
 
             if (!string.IsNullOrWhiteSpace(model.Gender))
             {
-                UpdateLogRow += $" Gender: {UserRequested.Gender} -> {model.Gender.Trim()}";
-                UserRequested.Gender = model.Gender.Trim();
+                string UpdatedGender = model.Gender.Trim();
+
+                UpdateLogRow += $" Gender: {UserRequested.Gender} -> {UpdatedGender}";
+                UserRequested.Gender = UpdatedGender;
+                UpdateRecord.Gender = UpdatedGender;
+
             }
 
             if (model.LanguageId.HasValue)
             {
-                UpdateLogRow += $" Preferred LanguageId: {UserRequested.PreferredLanguageId} -> {model.LanguageId.Value}";
-                UserRequested.PreferredLanguageId = model.LanguageId.Value;
+                byte UpdatedLanguageId = model.LanguageId.Value;
+
+                UpdateLogRow += $" Preferred LanguageId: {UserRequested.PreferredLanguageId} -> {UpdatedLanguageId}";
+                UserRequested.PreferredLanguageId = UpdatedLanguageId;
+                UpdateRecord.PreferredLanguageId = UpdatedLanguageId;
             }
 
             var updateResult = await _userManager.UpdateAsync(UserRequested);
@@ -224,8 +281,15 @@ namespace writings_backend_dotnet.Controllers.SessionHandler
                 });
             }
 
+            _db.UserUpdateRs.Add(UpdateRecord);
+            await _db.SaveChangesAsync();
+
+
             _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has updated his account: {UpdateLogRow}");
-            return Ok(new { message = "Profile updated successfully!" });
+            return Ok(new
+            {
+                message = "Profile updated successfully!",
+            });
         }
 
         [HttpPut, Route("password")]

@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Services;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.Models;
+using scriptium_backend_dotnet.Services;
 using Serilog;
 using Microsoft.AspNetCore.RateLimiting;
 using FluentValidation.AspNetCore;
+using scriptium_backend_dotnet.MiddleWare;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,34 +23,21 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 
-Log.Information("Application is starting..."); // Test log entry
+Log.Information("Application is starting...");
 
 builder.Host.UseSerilog();
-
 
 builder.Services.AddRateLimiter(option =>
 {
     option.AddFixedWindowLimiter(policyName: "StaticControllerRateLimiter", windowsOptions =>
     {
         windowsOptions.PermitLimit = 3;
-        windowsOptions.Window = TimeSpan.FromSeconds(10); //For testing
+        windowsOptions.Window = TimeSpan.FromSeconds(10);
     });
 
     option.AddFixedWindowLimiter(policyName: "AuthControllerRateLimit", windowsOptions =>
     {
         windowsOptions.PermitLimit = 10;
-        windowsOptions.Window = TimeSpan.FromDays(1);
-    });
-
-    option.AddFixedWindowLimiter(policyName: "InteractionControllerRateLimit", windowsOptions =>
-    {
-        windowsOptions.PermitLimit = 200;
-        windowsOptions.Window = TimeSpan.FromDays(1);
-    });
-
-    option.AddFixedWindowLimiter(policyName: "UpdateActionRateLimit", windowsOptions =>
-    {
-        windowsOptions.PermitLimit = 2;
         windowsOptions.Window = TimeSpan.FromDays(1);
     });
 
@@ -63,15 +51,24 @@ builder.Services.AddRateLimiter(option =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5277") // Frontend URL
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Required for cookies
+    });
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), options => options.CommandTimeout(180)));
 
-builder.Services.AddScoped<ITicketStore, SessionStore>();
-
+builder.Services.AddSingleton<ITicketStore, SessionStore>();
 builder.Services.AddScoped<ICacheService, CacheService>();
 
 builder.Services.AddIdentity<User, Role>(options =>
@@ -81,7 +78,7 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequiredUniqueChars = 0;
     options.Password.RequiredLength = 6;
-    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._";
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyz0123456789._";
 })
     .AddEntityFrameworkStores<ApplicationDBContext>()
     .AddDefaultTokenProviders();
@@ -90,20 +87,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnValidatePrincipal = async context =>
     {
-        var ticketStore = builder.Services.BuildServiceProvider().GetRequiredService<ITicketStore>();
-        options.SessionStore = ticketStore;
+        var ticketStore = context.HttpContext.RequestServices.GetRequiredService<ITicketStore>();
+        context.Options.SessionStore = ticketStore;
 
+        await Task.CompletedTask;
     };
-    //options.SessionStore = builder.Services.BuildServiceProvider().GetRequiredService<ITicketStore>();
-    options.LoginPath = "/Auth/login";
-    options.AccessDeniedPath = "/Auth/access-denied";
+    options.LoginPath = "/auth/login";
     options.ExpireTimeSpan = TimeSpan.FromDays(3);
-    options.SlidingExpiration = true;
+    options.SlidingExpiration = false;
 
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None;
     options.Cookie.SameSite = SameSiteMode.Strict;
-    options.Cookie.Name = "YourAppCookie";
+    options.Cookie.Name = "sessionB";
 });
 
 builder.Services.AddFluentValidationAutoValidation();
@@ -133,13 +129,15 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseRateLimiter();
 
+//app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.MapControllers();
 
 app.Run();
-
-

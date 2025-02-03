@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.Controllers.Validation;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.DTOs;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Controllers.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.DTOs;
+using scriptium_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Controllers.NoteHandler
+namespace scriptium_backend_dotnet.Controllers.NoteHandler
 {
 
     [ApiController, Route("note"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
@@ -21,7 +21,7 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         private readonly ILogger<NoteController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-        [HttpGet, Route("")]
+        [HttpGet, Route("notes")]
         public async Task<IActionResult> GetNote()
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -32,10 +32,16 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
             try
             {
-                List<NoteDTO> data = await _db.Note.Where(n => n.UserId == UserRequested.Id).Select(n => n.ToNoteDTO()).ToListAsync();
+
+                List<NoteDTOExtended> data = await _db.Note.Where(n => n.UserId == UserRequested.Id)
+                    .Include(n => n.Likes).ThenInclude(l => l.Like)
+                    .Include(n => n.Verse).ThenInclude(n => n.Chapter).ThenInclude(c => c.Meanings)
+                    .Include(n => n.Verse).ThenInclude(n => n.Chapter).ThenInclude(c => c.Section).ThenInclude(s => s.Scripture)
+                    .AsSplitQuery()
+                    .Select(n => n.ToNoteDTOExtended(UserRequested)).ToListAsync();
 
                 _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his note records. {data.Count} row has ben returned.");
                 return Ok(new { data });
@@ -43,15 +49,15 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get note records. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
 
 
 
-        [HttpGet, Route("{ScriptureNumber}/{SectionNumber}/{ChapterNumber}/{VerseNumber}")]
-        public async Task<IActionResult> GetNote([FromBody] VerseValidatedModel model)
+        [HttpGet, Route("{verseId}")]
+        public async Task<IActionResult> GetNote([FromRoute] int verseId)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -61,42 +67,46 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
-            Verse? VerseAttached = null;
+                return NotFound(new { message = "User not found." });
             try
             {
-                VerseAttached = await _db.Verse
-                                .Where(v => v.Number == model.VerseNumber &&
-                                        v.Chapter.Number == model.ChapterNumber &&
-                                        v.Chapter.Section.Number == model.SectionNumber &&
-                                        v.Chapter.Section.Scripture.Number == model.ScriptureNumber)
-                                        .FirstOrDefaultAsync();
+                Verse? VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Id == verseId);
 
                 if (VerseAttached == null)
-                    return NotFound(new { Message = "Verse not found." });
+                    return NotFound(new { message = "Verse not found." });
 
-                List<Note> data = await _db.Note
+
+                HashSet<Guid> FollowedUserIds = _db.Follow
+                        .Where(f => f.FollowerId == UserRequested.Id && f.Followed.IsPrivate.HasValue && f.Status == FollowStatus.Accepted)
+                        .Select(f => f.FollowedId)
+                        .ToHashSet();
+
+
+                List<NoteDTO> data = await _db.Note
                     .Where(n => n.VerseId == VerseAttached.Id &&
-                                _db.Follow.Any(f => //Notes attached on specified verse and whose UserRequested follows.
-                                    f.FollowerId == UserRequested.Id &&
-                                    f.FollowedId == n.UserId &&
-                                    f.Status == FollowStatus.Accepted))
-                                .ToListAsync();
+                              (n.UserId == UserRequested.Id || FollowedUserIds.Contains(n.UserId)))
 
-                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his note records attached on Verse: [Id: {VerseAttached?.Id}]. {data.Count} row has ben returned.");
+                               .Include(n => n.User)
+                               .Include(n => n.Likes).ThenInclude(l => l.Like)
+                               .Include(n => n.Comments)
+                               .AsSplitQuery()
+                                .Select(n => n.ToNoteDTO(UserRequested))
+                               .ToListAsync();
+
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his note records attached on Verse: [Id: {VerseAttached.Id}]. {data.Count} row has ben returned.");
                 return Ok(new { data });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get note records attached on Verse: [Id: {VerseAttached?.Id}]. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] trying to get note records attached on Verse: [Id: {verseId}]. Error Details: {ex}");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
 
 
 
         [HttpPost, Route("create")]
-        public async Task<IActionResult> CreateNote([FromBody] NoteModel model)
+        public async Task<IActionResult> CreateNote([FromBody] NoteCreateModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -106,15 +116,23 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
             Verse? VerseAttached = null;
+
+
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Number == model.Verse.VerseNumber && v.Chapter.Number == model.Verse.ChapterNumber && v.Chapter.Section.Number == model.Verse.SectionNumber && v.Chapter.Section.Scripture.Number == model.Verse.ScriptureNumber);
+                VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Id == model.VerseId);
 
                 if (VerseAttached == null)
-                    return NotFound(new { Message = "Verse not found." });
+                    return NotFound(new { message = "Verse not found." });
+
+                int NoteCount = await _db.Note.CountAsync(n => n.UserId == UserRequested.Id && n.VerseId == VerseAttached.Id);
+
+                if (NoteCount >= Utility.MAX_NOTE_COUNT_PER_VERSE)
+                    return Unauthorized(new { message = "You cannot have notes attached on this verse." });
 
 
                 Note NoteCreated = new()
@@ -128,19 +146,24 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
 
 
                 await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+
                 _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has created note on Verse: [Id: {VerseAttached?.Id}].");
-                return Ok(new { Message = "Note is successfully created!" });
+                return Ok(new { message = "Note is successfully created!" });
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
+
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] creating a note on Verse: [Id: {VerseAttached?.Id}]. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
 
 
         [HttpPut, Route("update")]
-        public async Task<IActionResult> UpdateNote([FromBody] NoteModel model)
+        public async Task<IActionResult> UpdateNote([FromBody] NoteUpdateModel model)
         {
             string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -150,33 +173,30 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Note? NoteUpdated = null;
 
             try
             {
-                Verse? VerseAttached = await _db.Verse.FirstOrDefaultAsync(v => v.Number == model.Verse.VerseNumber && v.Chapter.Number == model.Verse.ChapterNumber && v.Chapter.Section.Number == model.Verse.SectionNumber && v.Chapter.Section.Scripture.Number == model.Verse.ScriptureNumber);
 
-                if (VerseAttached == null)
-                    return NotFound(new { Message = "Verse not found." });
-
-                NoteUpdated = await _db.Note.FirstOrDefaultAsync(n => n.UserId == UserRequested.Id && n.VerseId == VerseAttached.Id);
+                Note? NoteUpdated = await _db.Note.FirstOrDefaultAsync(n => n.UserId == UserRequested.Id && n.Id == model.NoteId);
 
                 if (NoteUpdated == null)
-                    return NotFound(new { Message = "Note not found." });
+                    return NotFound(new { message = "Note not found." });
+
+                NoteUpdated.Text = model.NoteText;
 
                 _db.Note.Update(NoteUpdated);
 
                 await _db.SaveChangesAsync();
                 _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has updating Note: [Id: {NoteUpdated?.Id}].");
 
-                return Ok(new { Message = "Note is successfully updated!" });
+                return Ok(new { message = "Note is successfully updated!" });
             }
             catch (Exception)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] updating a Note: [Id: {NoteUpdated?.Id}]");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] updating a Note: [Id: {model.NoteId}]");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
 
@@ -191,7 +211,7 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
             Note? NoteDeleted = null;
 
@@ -200,19 +220,19 @@ namespace writings_backend_dotnet.Controllers.NoteHandler
                 NoteDeleted = await _db.Note.FirstOrDefaultAsync(n => n.UserId == UserRequested.Id && n.Id == model.NoteId);
 
                 if (NoteDeleted == null)
-                    return NotFound(new { Message = "Note not found!" });
+                    return NotFound(new { message = "Note not found!" });
 
                 _db.Note.Remove(NoteDeleted);
 
                 await _db.SaveChangesAsync();
 
-                return Ok(new { Message = "Note is successfully deleted" });
+                return Ok(new { message = "Note is successfully deleted" });
             }
             catch (Exception)
             {
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] deleting a Note: [Id: {NoteDeleted?.Id}]");
 
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
     }

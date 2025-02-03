@@ -1,15 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class FootNote
     {
         [Key, Column("id")]
         public long Id { get; set; }
-
-        [Column(TypeName = Utility.DBType16bitInteger)]
-        public short Number { get; set; }
 
         [Column(TypeName = Utility.DBType16bitInteger)]
         public short Index { get; set; }

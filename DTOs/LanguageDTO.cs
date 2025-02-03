@@ -1,8 +1,8 @@
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.DTOs
+namespace scriptium_backend_dotnet.DTOs
 {
-    public class LanguageSimpleDTO
+    public class LanguageDTO
     {
         public string LangCode { get; set; } = string.Empty;
         public string LangOwn { get; set; } = string.Empty;
@@ -11,9 +11,9 @@ namespace writings_backend_dotnet.DTOs
 
     public static class LanguageExtensions
     {
-        public static LanguageSimpleDTO ToLanguageSimpleDTO(this Language language)
+        public static LanguageDTO ToLanguageDTO(this Language language)
         {
-            return new LanguageSimpleDTO
+            return new LanguageDTO
             {
                 LangCode = language.LangCode,
                 LangOwn = language.LangOwn,

@@ -1,4 +1,4 @@
-namespace writings_backend_dotnet.Models.Util
+namespace scriptium_backend_dotnet.Models.Util
 {
     public enum EntityType
     {

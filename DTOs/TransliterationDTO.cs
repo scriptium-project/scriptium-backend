@@ -1,21 +1,21 @@
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.DTOs
+namespace scriptium_backend_dotnet.DTOs
 {
-    public class TransliterationSimpleDTO
+    public class TransliterationDTO
     {
         public required string Transliteration { get; set; }
-        public required LanguageSimpleDTO Language { get; set; }
+        public required LanguageDTO Language { get; set; }
     }
 
     public static class TransliterationExtensions
     {
-        public static TransliterationSimpleDTO ToTransliterationSimpleDTO(this Transliteration transliteration)
+        public static TransliterationDTO ToTransliterationDTO(this Transliteration transliteration)
         {
-            return new TransliterationSimpleDTO
+            return new TransliterationDTO
             {
                 Transliteration = transliteration.Text,
-                Language = transliteration.Language.ToLanguageSimpleDTO()
+                Language = transliteration.Language.ToLanguageDTO()
             };
         }
     }

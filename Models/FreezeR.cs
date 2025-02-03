@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet
+namespace scriptium_backend_dotnet
 {
 
 

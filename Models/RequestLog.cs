@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
 
     public class RequestLog

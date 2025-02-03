@@ -1,6 +1,6 @@
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.DTOs
+namespace scriptium_backend_dotnet.DTOs
 {
     public enum CollectionStatus
     {
@@ -16,8 +16,33 @@ namespace writings_backend_dotnet.DTOs
         public string? Message { get; set; }
     }
 
+    public class CollectionDTO
+    {
+        public required int Id { get; set; }
+        public required string Name { get; set; }
+        public required string? Description { get; set; }
+        public required int SaveCount { get; set; }
+    }
+
+    public class CollectionWithVerseSavedInformationDTO
+    {
+        public required string Name { get; set; }
+        public required string? Description { get; set; }
+        public required bool IsSaved { get; set; }
+    }
+
     public static class CollectionInsertResultDTOExtension
     {
+        public static CollectionDTO ToCollectionDTO(this Collection Collection)
+        {
+            return new CollectionDTO
+            {
+                Id = Collection.Id,
+                Name = Collection.Name,
+                Description = Collection.Description,
+                SaveCount = Collection.Verses?.Count ?? 0
+            };
+        }
 
         public static CollectionProcessResultDTO GetCollectionProcessResultDTO(this Collection? collection, string CollectionName)
         {

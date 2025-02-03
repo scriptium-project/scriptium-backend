@@ -1,15 +1,18 @@
 using System.Security.Claims;
+using AngleSharp.Dom;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.Controllers.Validation;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Controllers.Validation;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.DTOs;
+using scriptium_backend_dotnet.Models;
+using scriptium_backend_dotnet.Models.Util;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace writings_backend_dotnet.Controllers.LikeHandler
+namespace scriptium_backend_dotnet.Controllers.LikeHandler
 {
     [ApiController, Route("like"), Authorize, EnableRateLimiting(policyName: "InteractionControllerRateLimit")]
     public class LikeController(ApplicationDBContext db, UserManager<User> userManager, ILogger<LikeController> logger) : ControllerBase
@@ -17,6 +20,80 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
         private readonly ApplicationDBContext _db = db ?? throw new ArgumentNullException(nameof(db));
         private readonly UserManager<User> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         private readonly ILogger<LikeController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+
+        [HttpGet, Route("likes")]
+        public async Task<IActionResult> GetLikes()
+        {
+
+            string? UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (UserId == null)
+                return Unauthorized();
+
+            User? UserRequested = await _userManager.FindByIdAsync(UserId);
+
+            if (UserRequested == null)
+                return NotFound(new { message = "User not found." });
+
+            try
+            {
+                List<CommentDTOExtended>? comments = await _db.Comment
+                   .Where(c => c.LikeComments.Any(lc => lc.Like.UserId == UserRequested.Id) && c.CommentVerse != null)
+                    .Include(c => c.CommentVerse).ThenInclude(cv => cv.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Section).ThenInclude(s => s.Scripture).ThenInclude(s => s.Meanings).ThenInclude(m => m.Language)
+                    .Include(c => c.CommentVerse).ThenInclude(cv => cv.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Section).ThenInclude(s => s.Meanings).ThenInclude(m => m.Language)
+                    .Include(c => c.CommentVerse).ThenInclude(cv => cv.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Meanings).ThenInclude(m => m.Language)
+                    .AsSplitQuery()
+                    .Select(comment => new CommentDTOExtended
+                    {
+                        Id = comment.Id,
+                        User = comment.User.ToUserDTO(),
+                        Text = comment.Text,
+                        CreatedAt = comment.CreatedAt,
+                        UpdatedAt = comment.UpdatedAt,
+                        ParentCommentId = comment.ParentCommentId,
+                        LikeCount = comment.LikeCount,
+                        ReplyCount = comment.ReplyCount,
+                        IsLiked = true,
+                        Verse = comment.CommentVerse.Verse.ToVerseSimpleDTO()
+
+                    })
+                    .ToListAsync();
+
+                List<LikedNoteDTO> notes = await _db.Note
+                   .Where(n => n.Likes.Any(ln => ln.Like.UserId == UserRequested.Id))
+                    .Include(cv => cv.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Section).ThenInclude(s => s.Scripture).ThenInclude(s => s.Meanings).ThenInclude(m => m.Language)
+                    .Include(cv => cv.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Section).ThenInclude(s => s.Meanings).ThenInclude(m => m.Language)
+                    .Include(cv => cv.Verse).ThenInclude(v => v.Chapter).ThenInclude(c => c.Meanings).ThenInclude(m => m.Language)
+                    .AsSplitQuery()
+                    .Select(note => new LikedNoteDTO
+                    {
+                        Id = note.Id,
+                        NoteText = note.Text,
+                        User = note.User.ToUserDTO(),
+                        CreatedAt = note.CreatedAt,
+                        UpdatedAt = note.UpdatedAt,
+                        LikeCount = note.Likes.Count,
+                        ReplyCount = note.Comments.Count,
+                        IsLiked = true,
+                        Verse = note.Verse.ToVerseSimpleDTO()
+                    })
+                     .ToListAsync();
+
+
+                _logger.LogInformation($"Operation completed: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has demanded his like records. C: {comments.Count} + N: {notes.Count} row has ben returned.");
+
+                return Ok(new { data = new { comments, notes } });
+            }
+            catch (Exception)
+            {
+
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is demanding like records.");
+
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
+
+            }
+        }
 
 
         [HttpPost, Route("note")]
@@ -30,26 +107,38 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Note? NoteLiked = null;
 
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                NoteLiked = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.NoteId && n.Likes != null && n.Likes.Any(l => l.Like.UserId != UserRequested.Id));
+                Note? NoteLiked = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.NoteId);
 
                 if (NoteLiked == null)
                 {
                     _logger.LogWarning($"NotFound, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to Like Claimed Note: [model.NoteId: {model.NoteId}]");
-                    return NotFound(new { Message = "Note not found." });
+                    return NotFound(new { message = "Note not found." });
+                }
+
+                bool isAlreadyLiked = await _db.LikeNote.Include(c => c.Like).AnyAsync(lc =>
+                    lc.NoteId == NoteLiked.Id &&
+                    lc.Like != null &&
+                    lc.Like.UserId == UserRequested.Id
+                );
+
+                if (isAlreadyLiked)
+                {
+                    _logger.LogWarning($"Conflict, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {NoteLiked.Id}] User already liked this comment.");
+                    return Conflict(new { message = "You have already liked this comment!" });
                 }
 
                 bool isFollowingOwner = await _db.Follow.AnyAsync(f => f.FollowerId == UserRequested.Id && f.FollowedId == NoteLiked.UserId && f.Status == FollowStatus.Accepted);
 
-                if (!isFollowingOwner)
+                if (!isFollowingOwner && UserRequested.Id != NoteLiked.UserId)
                 {
                     _logger.LogWarning($"Unauthorized, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Note: [Id: {NoteLiked.Id}, NoteOwnerUsername: {NoteLiked.User.UserName}]");
-                    return Unauthorized(new { Message = "You do not have permission do like this note." });
+                    return Unauthorized(new { message = "You do not have permission do like this note." });
                 }
 
 
@@ -60,7 +149,8 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
 
                 LikeNote LikeNoteCreated = new()
                 {
-                    LikeId = LikeCreated.Id,
+                    Like = LikeCreated,
+                    Note = NoteLiked,
                     NoteId = NoteLiked.Id
                 };
 
@@ -69,13 +159,18 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
 
                 await _db.SaveChangesAsync();
 
+                await transaction.CommitAsync();
+
                 _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has successfully liked Note: [Id: {NoteLiked.Id}, NoteOwnerUsername: {NoteLiked.User.UserName}]");
-                return Ok(new { Message = "Note is successfully liked" });
+                return Ok(new { message = "Note is successfully liked" });
             }
             catch (Exception)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Note: [Id: {NoteLiked?.Id}, NoteOwnerUsername: {NoteLiked?.User.UserName}]");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+
+                await transaction.RollbackAsync();
+
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Note: [Id: {model.NoteId}]");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -91,29 +186,26 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
 
-            Note? NoteTarget = null;
-
-            Comment? CommentLiked = null;
 
             try
             {
-                NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.EntityId);
+                Note? NoteTarget = await _db.Note.FirstOrDefaultAsync(n => n.Id == model.EntityId);
 
                 if (NoteTarget == null)
                 {
                     _logger.LogWarning($"NotFound, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to Like Comment On Claimed Note: [model.EntityId: {model.EntityId}]");
-                    return NotFound(new { Message = "Note not found." });
+                    return NotFound(new { message = "Note not found." });
                 }
 
-                CommentLiked = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.CommentNote != null && c.CommentNote.NoteId == NoteTarget.Id);
+                Comment? CommentLiked = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.CommentNote != null && c.CommentNote.NoteId == NoteTarget.Id);
 
                 if (CommentLiked == null)
                 {
                     _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Claimed Comment: [model.CommentId: {model.CommentId}] on Comment/Note");
-                    return NotFound(new { Message = "Comment not found." });
+                    return NotFound(new { message = "Comment not found." });
                 }
 
                 HashSet<long> LikeableNoteCommentIds = _db.GetAvailableNoteCommentIds(UserRequested.Id, NoteTarget.Id);
@@ -123,7 +215,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 if (!(isFollowing && LikeableNoteCommentIds.Contains(CommentLiked.Id)))
                 {
                     _logger.LogWarning($"Unauthorized, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {CommentLiked.Id}, CommentOwnerUsername: {CommentLiked.User.UserName}] on Note: [Id: {NoteTarget.Id}, NoteOwnerUsername: {NoteTarget.User.UserName}]. User does not have permission to like.");
-                    return Unauthorized(new { Message = "You do not have permission to attach comment to this note" });
+                    return Unauthorized(new { message = "You do not have permission to attach comment to this note" });
                 }
 
                 Like LikeCreated = new()
@@ -144,12 +236,12 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 await _db.SaveChangesAsync();
 
                 _logger.LogInformation($"Operation completed.  User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has successfully liked Comment: [Id: {CommentLiked.Id}, CommentOwnerUsername: {CommentLiked.User.UserName}] on Note: [Id: {NoteTarget.Id}, NoteOwnerUsername: {NoteTarget.User.UserName}]");
-                return Ok(new { Message = "You have successfully liked the comment on this specified note!" });
+                return Ok(new { message = "You have successfully liked the comment on this specified note!" });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {CommentLiked?.Id}, CommentOwnerUsername: {CommentLiked?.User.UserName}] on Note: [Id: {NoteTarget?.Id}, NoteOwnerUsername: {NoteTarget?.User.UserName}]. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {model.CommentId}] on Note: [Id: {model.EntityId}]. Error Details: {ex}");
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -165,25 +257,34 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
-            Verse? VerseTarget = null;
-
-            Comment? CommentLiked = null;
-
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                VerseTarget = await _db.Verse.FirstOrDefaultAsync(n => n.Id == model.EntityId);
+                Verse? VerseTarget = await _db.Verse.FirstOrDefaultAsync(n => n.Id == model.EntityId);
 
                 if (VerseTarget == null)
-                    return NotFound(new { Message = "Verse not found." });
+                    return NotFound(new { message = "Verse not found." });
 
-                CommentLiked = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.CommentVerse != null && c.CommentVerse.VerseId == VerseTarget.Id);
+                Comment? CommentLiked = await _db.Comment.FirstOrDefaultAsync(c => c.Id == model.CommentId && c.CommentVerse != null && c.CommentVerse.VerseId == VerseTarget.Id);
 
                 if (CommentLiked == null)
                 {
                     _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Claimed Comment: [model.CommentId: {model.CommentId}] on Verse: [Id: {VerseTarget.Id}]");
-                    return NotFound(new { Message = "Comment not found." });
+                    return NotFound(new { message = "Comment not found." });
+                }
+
+                bool isAlreadyLiked = await _db.LikeComment.Include(c => c.Like).AnyAsync(lc =>
+                    lc.CommentId == CommentLiked.Id &&
+                    lc.Like != null &&
+                    lc.Like.UserId == UserRequested.Id
+                );
+
+                if (isAlreadyLiked)
+                {
+                    _logger.LogWarning($"Conflict, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {CommentLiked.Id} on Verse: [Id: {VerseTarget.Id}]. User already liked this comment.");
+                    return Conflict(new { message = "You have already liked this comment!" });
                 }
 
                 HashSet<long> LikeableVerseCommentIds = _db.GetAvailableVerseCommentIds(UserRequested.Id, VerseTarget.Id);
@@ -191,7 +292,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 if (!LikeableVerseCommentIds.Contains(CommentLiked.Id))
                 {
                     _logger.LogWarning($"Unauthorized, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {CommentLiked.Id}, CommentOwnerUsername: {CommentLiked.User.UserName}] on Verse: [Id: {VerseTarget.Id}] User does not have permission to like.");
-                    return Unauthorized(new { Message = "You do not have permission to attach comment to this note" });
+                    return Unauthorized(new { message = "You do not have permission to attach comment to this note" });
                 }
 
                 Like LikeCreated = new()
@@ -202,7 +303,8 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 LikeComment LikeCommentCreated = new()
                 {
                     CommentId = CommentLiked.Id,
-                    LikeId = LikeCreated.Id,
+                    Comment = CommentLiked,
+                    Like = LikeCreated
                 };
 
                 _db.Like.Add(LikeCreated);
@@ -210,13 +312,21 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
 
                 await _db.SaveChangesAsync();
 
-                _logger.LogInformation($"Operation completed.  User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has successfully liked Comment: [Id: {CommentLiked.Id}, CommentOwnerUsername: {CommentLiked.User.UserName}] on Verse: [Id: {VerseTarget.Id}]");
-                return Ok(new { Message = "You have successfully liked the comment!" });
+                _logger.LogInformation($"Operation completed.  User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has successfully liked Comment: [Id: {CommentLiked.Id}] on Verse: [Id: {VerseTarget.Id}]");
+
+                await transaction.CommitAsync();
+
+                return Ok(new { message = "You have successfully liked the comment!" });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {CommentLiked?.Id}, CommentOwnerUsername: {CommentLiked?.User.UserName}] on Verse: [Id: {VerseTarget?.Id}]. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+
+                _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to like Comment: [Id: {model.EntityId}. Error Details: {ex}");
+
+
+                await transaction.RollbackAsync();
+
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -233,7 +343,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
             Like? LikeDeleted = null;
 
@@ -244,7 +354,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 if (LikeDeleted == null)
                 {
                     _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to remove on Note: [model.NoteId: {model.NoteId}]");
-                    return NotFound(new { Message = "There is no 'like' attached this note." });
+                    return NotFound(new { message = "There is no 'like' attached this note." });
                 }
 
                 _db.Like.Remove(LikeDeleted);
@@ -252,12 +362,12 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 await _db.SaveChangesAsync();
 
                 _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has removed his Like: [Id: {LikeDeleted.Id}] on Note");
-                return Ok(new { Message = "Like that attached this note is successfully deleted." });
+                return Ok(new { message = "Like that attached this note is successfully deleted." });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to remove Like: [Id: {LikeDeleted?.Id}] on Note. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
 
         }
@@ -273,7 +383,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
             User? UserRequested = await _userManager.FindByIdAsync(UserId);
 
             if (UserRequested == null)
-                return NotFound(new { Message = "User not found." });
+                return NotFound(new { message = "User not found." });
 
 
             Like? LikeDeleted = null;
@@ -285,7 +395,7 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 if (LikeDeleted == null)
                 {
                     _logger.LogWarning($"Not Found, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to remove on Claimed Comment: [model.CommentId: {model.CommentId}]");
-                    return NotFound(new { Message = "There is no 'like' attached this comment." });
+                    return NotFound(new { message = "There is no 'like' attached this comment." });
                 }
 
                 _db.Like.Remove(LikeDeleted);
@@ -294,12 +404,12 @@ namespace writings_backend_dotnet.Controllers.LikeHandler
                 await _db.SaveChangesAsync();
                 _logger.LogInformation($"Operation completed. User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] has removed his Like: [Id: {LikeDeleted.Id}] on Comment");
 
-                return Ok(new { Message = "Like that attached this comment is successfully deleted." });
+                return Ok(new { message = "Like that attached this comment is successfully deleted." });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error occurred, while: User: [Id: {UserRequested.Id}, Username: {UserRequested.UserName}] is trying to remove Like: [Id: {LikeDeleted?.Id}] on Comment. Error Details: {ex}");
-                return BadRequest(new { Message = "Something went unexpectedly wrong?" });
+                return BadRequest(new { message = "Something went unexpectedly wrong?" });
             }
         }
     }

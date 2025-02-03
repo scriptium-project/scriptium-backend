@@ -1,7 +1,7 @@
 using FluentValidation;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Controllers.Validation
+namespace scriptium_backend_dotnet.Controllers.Validation
 {
     public class CommentLikeProcessModel
     {
@@ -21,16 +21,16 @@ namespace writings_backend_dotnet.Controllers.Validation
         }
     }
 
-    public class EntityCommentCreateModel
+    public class CommentCreateModel
     {
         public required long EntityId { get; set; }
         public required string CommentText { get; set; }
         public required long? ParentCommentId { get; set; }
     }
 
-    public class EntityCommentCreateModelValidator : AbstractValidator<EntityCommentCreateModel>
+    public class CommentCreateModelValidator : AbstractValidator<CommentCreateModel>
     {
-        public EntityCommentCreateModelValidator()
+        public CommentCreateModelValidator()
         {
             RuleFor(r => r.EntityId).NotEmpty()
             .GreaterThan(0).WithMessage("Variable EntityId must be greater than 0.");

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class Notification
     {
@@ -16,7 +16,7 @@ namespace writings_backend_dotnet.Models
         [Required]
         public NotificationType NotificationType { get; set; }
 
-        public EntityType? EntityType { get; set; } 
+        public EntityType? EntityType { get; set; }
 
         public Guid? EntityId { get; set; }
 

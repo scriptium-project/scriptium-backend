@@ -1,30 +1,30 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using writings_backend_dotnet.Models.Util;
+using scriptium_backend_dotnet.Models.Util;
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class Follow
-{
-    [Key]
-    public long Id { get; set; }
+    {
+        [Key]
+        public long Id { get; set; }
 
-    [Required]
-    public Guid FollowerId { get; set; }
+        [Required]
+        public Guid FollowerId { get; set; }
 
-    [Required]
-    public Guid FollowedId { get; set; }
+        [Required]
+        public Guid FollowedId { get; set; }
 
-    [Required]
-    public FollowStatus Status { get; set; }
-    
-    [Required]
-    public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
+        [Required]
+        public FollowStatus Status { get; set; }
 
-    [ForeignKey("FollowerId")]
-    public virtual User Follower { get; set; } = null!;
+        [Required]
+        public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
 
-    [ForeignKey("FollowedId")]
-    public virtual User Followed { get; set; } = null!;
-}
+        [ForeignKey("FollowerId")]
+        public virtual User Follower { get; set; } = null!;
+
+        [ForeignKey("FollowedId")]
+        public virtual User Followed { get; set; } = null!;
+    }
 }

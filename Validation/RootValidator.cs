@@ -1,7 +1,7 @@
 using FluentValidation;
 
 
-namespace writings_backend_dotnet.Controllers.Validation
+namespace scriptium_backend_dotnet.Controllers.Validation
 {
 
     public class RootValidatedDTO

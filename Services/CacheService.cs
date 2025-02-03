@@ -1,14 +1,14 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using writings_backend_dotnet.DB;
-using writings_backend_dotnet.Models;
+using scriptium_backend_dotnet.DB;
+using scriptium_backend_dotnet.Models;
 
-namespace writings_backend_dotnet.Services
+namespace scriptium_backend_dotnet.Services
 {
     public interface ICacheService
     {
         Task<T?> GetCachedDataAsync<T>(string key);
-        Task SetCacheDataAsync<T>(string key, T data);
+        Task SetCacheDataAsync<T>(string key, T data, double? ExpirationDayCount = 10);
     }
 
     public class CacheService(ApplicationDBContext db) : ICacheService
@@ -17,7 +17,7 @@ namespace writings_backend_dotnet.Services
 
         public async Task<T?> GetCachedDataAsync<T>(string key)
         {
-            var cache = await _db.Cache
+            Cache? cache = await _db.Cache
                 .Where(c => c.Key == key && c.ExpirationDate > DateTime.UtcNow)
                 .FirstOrDefaultAsync();
 
@@ -47,11 +47,11 @@ namespace writings_backend_dotnet.Services
         }
 
 
-        public async Task SetCacheDataAsync<T>(string key, T data)
+        public async Task SetCacheDataAsync<T>(string key, T data, double? ExpirationDayCount)
         {
             string jsonData = JsonSerializer.Serialize(data);
 
-            var existingCacheEntry = await _db.Cache.FirstOrDefaultAsync(c => c.Key == key);
+            Cache? existingCacheEntry = await _db.Cache.FirstOrDefaultAsync(c => c.Key == key);
 
             if (existingCacheEntry != null)
             {
@@ -64,12 +64,12 @@ namespace writings_backend_dotnet.Services
                 {
                     Key = key,
                     Data = jsonData,
-                    ExpirationDate = DateTime.UtcNow + TimeSpan.FromDays(1)
+                    ExpirationDate = DateTime.UtcNow + TimeSpan.FromDays(ExpirationDayCount ?? 10)
                 };
 
                 _db.Cache.Add(cacheEntry);
 
-                var cacheR = new CacheR
+                CacheR cacheR = new()
                 {
                     Cache = cacheEntry,
                     FetchedAt = DateTime.UtcNow

@@ -2,14 +2,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     public class Chapter
     {
         [Key, Column("id", TypeName = Utility.DBType16bitInteger)]
         public short Id { get; set; }
 
-        [Required, Column("name", TypeName = Utility.DBTypeVARCHAR100)]
+        [Required, Column("name", TypeName = Utility.DBTypeNVARCHAR255)]
         public required string Name { get; set; }
 
         [Required, Column("number", TypeName = Utility.DBType8bitInteger)]

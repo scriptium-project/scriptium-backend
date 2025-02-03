@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 
-namespace writings_backend_dotnet.Validation
+namespace scriptium_backend_dotnet.Validation
 {
     public class TranslationTextIdentifierModel
     {

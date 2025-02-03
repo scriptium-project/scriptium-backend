@@ -1,16 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace writings_backend_dotnet.Models
+namespace scriptium_backend_dotnet.Models
 {
     [Table("collection_verse")]
     public class CollectionVerse
     {
         [Key, Column("id", TypeName = Utility.DBType64bitInteger)]
-        public long Id { get; set; }
+        public ulong Id { get; set; }
 
-        [Required, ForeignKey("Collection"), Column("collection_id", TypeName = Utility.DBTypeUUID)]
-        public Guid CollectionId { get; set; }
+        [Required, ForeignKey("Collection"), Column("collection_id", TypeName = Utility.DBType32bitInteger)]
+        public int CollectionId { get; set; }
 
         public virtual Collection Collection { get; set; } = null!;
 
