@@ -8,7 +8,7 @@ Scriptium is primarily intended for theological research and the exchange of ide
 
 ## Scriptium Backend
 
-This repository provides the **backend** for the [Scriptium Frontend](https://github.com/kaanoz1/Scriptium-frontend). It is built with **.NET** and **Entity Framework Core (EF Core)**.
+This repository provides the **backend** for the [Scriptium Frontend](https://github.com/scriptium-project/Scriptium-frontend). It is built with **.NET** and **Entity Framework Core (EF Core)**.
 
 - The backend serves as an **API** that handles data management, user interactions, authentication, and more.
 - All project dependencies are listed in the `.csproj` file.
@@ -42,7 +42,7 @@ Thank you for your interest in contributing to **Scriptium**! Your contributions
    - Clone your forked repository to your local machine:
 
      ```bash
-     git clone https://github.com/kaanoz1/Scriptium-backend.git
+     git clone https://github.com/scriptium-project/Scriptium-backend.git
      ```
 
 3. **Create a Branch:**
